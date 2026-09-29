@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class VisitorComment extends Model
 {
     use HasFactory;
-
+//protected fill yang boleh diisi pengguna
     protected $fillable = [
         'event_id',
         'visitor_id',
