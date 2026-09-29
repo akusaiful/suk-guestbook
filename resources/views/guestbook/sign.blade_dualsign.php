@@ -384,7 +384,7 @@
         }
 
         /* =========================================================
-           SIGNATURE AREA
+           DUAL SIGNING AREA — 75% / 25%
         ========================================================= */
 
         .signature-area {
@@ -401,34 +401,59 @@
 
         .signature-hint {
             flex: 0 0 auto;
-            min-height: 0;
-            margin-bottom: 7px;
-            padding: 0 10px;
+            min-height: 14px;
+            margin-bottom: 5px;
             text-align: center;
-            line-height: 1.08;
-            color: #3d251b;
+            font-size: clamp(8px, 0.75vw, 10px);
+            font-weight: 700;
+            color: #6b7280;
+            white-space: nowrap;
         }
 
-        .signature-hint-main {
-            display: block;
-            font-size: clamp(15px, 1.65vw, 23px);
-            line-height: 1.05;
-            font-weight: 900;
+        .dual-signing-pads {
+            flex: 1 1 auto;
+            min-height: 0;
+            width: 100%;
+            display: grid;
+            grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
+            gap: 9px;
+            overflow: hidden;
+        }
+
+        .sign-pad-column {
+            min-width: 0;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pad-title {
+            flex: 0 0 auto;
+            min-height: 20px;
+            margin-bottom: 4px;
+            padding: 0 4px;
+            text-align: center;
+            font-size: clamp(9px, 0.8vw, 11px);
+            line-height: 1.1;
+            font-weight: 800;
             letter-spacing: .35px;
             color: var(--gb-text, #3d251b);
+            white-space: nowrap;
         }
 
-        .signature-hint-sub {
-            display: block;
-            margin-top: 4px;
-            font-size: clamp(13px, 1.35vw, 19px);
-            line-height: 1.08;
-            font-weight: 800;
-            letter-spacing: .25px;
-            color: #6b7280;
+        .required-mark {
+            color: var(--gb-primary, #861b24);
+            font-weight: 900;
         }
 
-        .signature-box {
+        .optional-mark {
+            font-size: .82em;
+            font-weight: 600;
+            opacity: .72;
+        }
+
+        .signature-box,
+        .greeting-box {
             position: relative;
             flex: 1 1 auto;
             min-height: 0;
@@ -441,7 +466,8 @@
             touch-action: none;
         }
 
-        .signature-pad {
+        .signature-pad,
+        .greeting-pad {
             position: absolute;
             inset: 0;
             display: block;
@@ -450,6 +476,26 @@
             background: #ffffff;
             touch-action: none;
             cursor: crosshair;
+        }
+
+        .greeting-placeholder {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            text-align: center;
+            font-size: clamp(9px, 0.9vw, 12px);
+            line-height: 1.3;
+            color: #9ca3af;
+            pointer-events: none;
+            transition: opacity .18s ease;
+        }
+
+        .greeting-placeholder.hidden {
+            opacity: 0;
         }
 
         /* =========================================================
@@ -534,6 +580,235 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
+        }
+
+        /* =========================================================
+           FIX — CONTROL BAR DI BAWAH
+           Supaya TAJUK UCAPAN tidak terlindung.
+        ========================================================= */
+
+        .signature-controls {
+            top: auto !important;
+            right: 8px !important;
+            bottom: 5px !important;
+            z-index: 50 !important;
+        }
+
+        .greeting-column .pad-title {
+            position: relative;
+            z-index: 5;
+            text-align: center;
+            padding-left: 4px;
+            padding-right: 4px;
+        }
+
+        .btn-preview {
+            display: none;
+            min-width: 64px;
+            min-height: 28px;
+            padding: 5px 10px;
+            border: 1px solid var(--gb-primary, #861b24);
+            border-radius: 6px;
+            background: #ffffff;
+            color: var(--gb-primary, #861b24);
+            font-size: 9px;
+            font-weight: 800;
+            cursor: pointer;
+            touch-action: manipulation;
+            white-space: nowrap;
+        }
+
+        .btn-preview.visible {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-preview:hover {
+            filter: brightness(.97);
+        }
+
+        /* =========================================================
+           PAPAR — PREVIEW SIGNATURE + UCAPAN
+        ========================================================= */
+
+        .signature-preview-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 99998;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, .60);
+        }
+
+        .signature-preview-modal.visible {
+            display: flex;
+        }
+
+        .signature-preview-dialog {
+            width: min(1180px, 96vw);
+            max-height: 92vh;
+            overflow: hidden;
+            border-radius: 14px;
+            background: #ffffff;
+            box-shadow: 0 20px 60px rgba(0,0,0,.30);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .signature-preview-header {
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 16px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .signature-preview-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: #111827;
+        }
+
+        .signature-preview-close {
+            border: 0;
+            min-width: 34px;
+            min-height: 34px;
+            border-radius: 8px;
+            background: #f3f4f6;
+            color: #111827;
+            font-size: 18px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .signature-preview-body {
+            min-height: 0;
+            overflow: auto;
+            padding: 14px;
+        }
+
+        .signature-preview-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 3fr) minmax(260px, 1fr);
+            gap: 12px;
+        }
+
+        .signature-preview-panel {
+            min-width: 0;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            padding: 10px;
+            background: #fafafa;
+        }
+
+        .signature-preview-panel-title {
+            margin-bottom: 8px;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .35px;
+            color: #374151;
+        }
+
+        .signature-preview-image-wrap {
+            position: relative;
+            width: 100%;
+            height: min(58vh, 430px);
+            border: 1px dashed #c39a52;
+            border-radius: 8px;
+            background: #ffffff;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .signature-preview-image {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .signature-preview-empty {
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #9ca3af;
+        }
+
+        @media (orientation: landscape) and (max-height: 520px) {
+
+            .signature-controls {
+                top: auto !important;
+                right: 4px !important;
+                bottom: 2px !important;
+            }
+
+            .btn-preview {
+                min-height: 24px;
+                min-width: 56px;
+                padding: 4px 8px;
+                font-size: 8px;
+            }
+
+            .signature-preview-modal {
+                padding: 8px;
+            }
+
+            .signature-preview-dialog {
+                width: 98vw;
+                max-height: 96vh;
+                border-radius: 9px;
+            }
+
+            .signature-preview-header {
+                padding: 7px 10px;
+            }
+
+            .signature-preview-title {
+                font-size: 11px;
+            }
+
+            .signature-preview-close {
+                min-width: 28px;
+                min-height: 28px;
+                font-size: 15px;
+            }
+
+            .signature-preview-body {
+                padding: 8px;
+            }
+
+            .signature-preview-grid {
+                grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
+                gap: 6px;
+            }
+
+            .signature-preview-panel {
+                padding: 6px;
+                border-radius: 7px;
+            }
+
+            .signature-preview-panel-title {
+                margin-bottom: 4px;
+                font-size: 8px;
+            }
+
+            .signature-preview-image-wrap {
+                height: min(58vh, 260px);
+                border-radius: 6px;
+            }
+
+            .signature-preview-empty {
+                padding: 10px;
+                font-size: 9px;
+            }
         }
 
         /* =========================================================
@@ -662,27 +937,27 @@
             }
 
             .signature-hint {
-                min-height: 0;
-                margin-bottom: 4px;
-                padding: 0 4px;
-            }
-
-            .signature-hint-main {
-                font-size: 12px;
-                line-height: 1.04;
-            }
-
-            .signature-hint-sub {
-                margin-top: 2px;
-                font-size: 10px;
-                line-height: 1.04;
+                min-height: 11px;
+                margin-bottom: 2px;
+                font-size: 7px;
             }
 
             .signature-area {
                 padding-bottom: 18px;
             }
 
-            .signature-box {
+            .dual-signing-pads {
+                gap: 5px;
+            }
+
+            .pad-title {
+                min-height: 15px;
+                margin-bottom: 2px;
+                font-size: 7px;
+            }
+
+            .signature-box,
+            .greeting-box {
                 width: 100%;
                 height: auto;
                 flex: 1 1 auto;
@@ -690,9 +965,15 @@
                 border-radius: 6px;
             }
 
+            .greeting-placeholder {
+                padding: 6px;
+                font-size: 7px;
+            }
+
             .signature-controls {
-                top: 4px;
+                top: auto;
                 right: 4px;
+                bottom: 2px;
                 gap: 4px;
                 padding: 3px 4px;
                 border-radius: 5px;
@@ -804,11 +1085,7 @@
             color: #0b4f8a !important;
         }
 
-        body.guestbook-theme.theme-government-blue .signature-hint-main {
-            color: #0b4f8a !important;
-        }
-
-        body.guestbook-theme.theme-government-blue .signature-hint-sub {
+        body.guestbook-theme.theme-government-blue .signature-hint {
             color: #58758b !important;
         }
 
@@ -982,11 +1259,7 @@
             text-shadow: 0 1px 3px rgba(0,0,0,.38) !important;
         }
 
-        body.guestbook-theme.theme-modern-melaka .signature-hint-main {
-            color: #f6d878 !important;
-        }
-
-        body.guestbook-theme.theme-modern-melaka .signature-hint-sub {
+        body.guestbook-theme.theme-modern-melaka .signature-hint {
             color: #d8cdb9 !important;
         }
 
@@ -1084,6 +1357,43 @@
 
         body.guestbook-theme.theme-modern-melaka .rotate-text {
             color: #d8cdb9 !important;
+        }
+
+        /* ============================================================
+           DUAL PAD ELEMENTS — THEME OVERRIDES
+           ============================================================ */
+
+        body.guestbook-theme.theme-government-blue .pad-title {
+            color: #0b4f8a !important;
+        }
+
+        body.guestbook-theme.theme-government-blue .greeting-box {
+            background: #ffffff !important;
+            border-color: #6ca7d7 !important;
+            box-shadow:
+                inset 0 0 0 1px rgba(11,79,138,.05),
+                0 8px 20px rgba(7,54,91,.10) !important;
+        }
+
+        body.guestbook-theme.theme-government-blue .greeting-placeholder {
+            color: #6f879b !important;
+        }
+
+        body.guestbook-theme.theme-modern-melaka .pad-title {
+            color: #f6d878 !important;
+            text-shadow: 0 1px 3px rgba(0,0,0,.34) !important;
+        }
+
+        body.guestbook-theme.theme-modern-melaka .greeting-box {
+            background: #fffdf8 !important;
+            border-color: #d4af37 !important;
+            box-shadow:
+                inset 0 0 0 1px rgba(212,175,55,.09),
+                0 10px 24px rgba(0,0,0,.24) !important;
+        }
+
+        body.guestbook-theme.theme-modern-melaka .greeting-placeholder {
+            color: #9f947f !important;
         }
     </style>
 
@@ -1305,60 +1615,106 @@
                 <div class="signature-area">
 
                     <div class="signature-hint">
-                        <span class="signature-hint-main">
-                            Sila Tandatangan
-                        </span>
-                        <span class="signature-hint-sub">
-                            Turutkan Coretan
-                        </span>
+                        Tandatangan diperlukan. Ucapan adalah pilihan.
                     </div>
 
-
-                    <div class="signature-box">
-
+                    <div class="dual-signing-pads">
 
                         {{-- =================================================
-                             KAWALAN DALAM PENJURU KANAN ATAS
+                             75% — TANDATANGAN
                         ================================================== --}}
 
-                        <div
-                            class="signature-controls"
-                            id="signature-controls"
-                        >
+                        <div class="sign-pad-column signature-column">
 
-                            <button
-                                type="button"
-                                id="clear-signature"
-                                class="btn-clear"
-                            >
-                                CLEAR
-                            </button>
+                            <div class="pad-title">
+                                TANDATANGAN
+                                <span class="required-mark">*</span>
+                            </div>
 
+                            <div class="signature-box">
 
-                            <div
-                                id="signature-countdown"
-                                class="signature-countdown"
-                                aria-live="polite"
-                            ></div>
+                                <canvas
+                                    id="signature-pad"
+                                    class="signature-pad"
+                                    aria-label="Ruang tandatangan digital"
+                                ></canvas>
 
-
-                            <button
-                                type="button"
-                                id="back-to-waiting"
-                                class="btn-back"
-                            >
-                                ← KEMBALI
-                            </button>
+                            </div>
 
                         </div>
 
 
-                        <canvas
-                            id="signature-pad"
-                            class="signature-pad"
-                            aria-label="Ruang tandatangan digital"
-                        ></canvas>
+                        {{-- =================================================
+                             25% — UCAPAN / TULISAN
+                        ================================================== --}}
 
+                        <div class="sign-pad-column greeting-column">
+
+                            <div class="pad-title">
+                                UCAPAN
+                                <span class="optional-mark">(Pilihan)</span>
+                            </div>
+
+                            <div class="greeting-box">
+
+                                <canvas
+                                    id="greeting-pad"
+                                    class="greeting-pad"
+                                    aria-label="Ruang menulis ucapan"
+                                ></canvas>
+
+                                <div
+                                    id="greeting-placeholder"
+                                    class="greeting-placeholder"
+                                >
+                                    Tulis ucapan di sini
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    {{-- =================================================
+                         KAWALAN
+                    ================================================== --}}
+
+                    <div
+                        class="signature-controls"
+                        id="signature-controls"
+                    >
+
+                        <button
+                            type="button"
+                            id="clear-signature"
+                            class="btn-clear"
+                        >
+                            CLEAR
+                        </button>
+
+                        <div
+                            id="signature-countdown"
+                            class="signature-countdown"
+                            aria-live="polite"
+                        ></div>
+
+                        <button
+                            type="button"
+                            id="preview-signature"
+                            class="btn-preview"
+                        >
+                            PAPAR
+                        </button>
+
+                        <button
+                            type="button"
+                            id="back-to-waiting"
+                            class="btn-back"
+                        >
+                            ← KEMBALI
+                        </button>
 
                     </div>
 
@@ -1369,6 +1725,103 @@
 
 
         </section>
+
+
+        {{-- =========================================================
+             PAPAR — PREVIEW SIGNATURE + UCAPAN
+        ========================================================== --}}
+
+        <div
+            id="signature-preview-modal"
+            class="signature-preview-modal"
+            aria-hidden="true"
+        >
+
+            <div
+                class="signature-preview-dialog"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="signature-preview-title"
+            >
+
+                <div class="signature-preview-header">
+
+                    <div
+                        id="signature-preview-title"
+                        class="signature-preview-title"
+                    >
+                        Paparan Tandatangan & Ucapan
+                    </div>
+
+                    <button
+                        type="button"
+                        id="close-signature-preview"
+                        class="signature-preview-close"
+                        aria-label="Tutup paparan"
+                    >
+                        ×
+                    </button>
+
+                </div>
+
+
+                <div class="signature-preview-body">
+
+                    <div class="signature-preview-grid">
+
+                        <div class="signature-preview-panel">
+
+                            <div class="signature-preview-panel-title">
+                                TANDATANGAN
+                            </div>
+
+                            <div class="signature-preview-image-wrap">
+
+                                <img
+                                    id="preview-signature-image"
+                                    class="signature-preview-image"
+                                    alt="Paparan tandatangan"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="signature-preview-panel">
+
+                            <div class="signature-preview-panel-title">
+                                UCAPAN
+                            </div>
+
+                            <div class="signature-preview-image-wrap">
+
+                                <img
+                                    id="preview-greeting-image"
+                                    class="signature-preview-image"
+                                    alt="Paparan ucapan"
+                                    style="display:none;"
+                                >
+
+                                <div
+                                    id="preview-greeting-empty"
+                                    class="signature-preview-empty"
+                                >
+                                    Tiada ucapan direkodkan.
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
 
     </main>
 
@@ -1454,6 +1907,46 @@
                         'signature-pad'
                     );
 
+                const greetingCanvas =
+                    document.getElementById(
+                        'greeting-pad'
+                    );
+
+                const greetingPlaceholder =
+                    document.getElementById(
+                        'greeting-placeholder'
+                    );
+
+                const previewSignatureButton =
+                    document.getElementById(
+                        'preview-signature'
+                    );
+
+                const previewModal =
+                    document.getElementById(
+                        'signature-preview-modal'
+                    );
+
+                const closePreviewButton =
+                    document.getElementById(
+                        'close-signature-preview'
+                    );
+
+                const previewSignatureImage =
+                    document.getElementById(
+                        'preview-signature-image'
+                    );
+
+                const previewGreetingImage =
+                    document.getElementById(
+                        'preview-greeting-image'
+                    );
+
+                const previewGreetingEmpty =
+                    document.getElementById(
+                        'preview-greeting-empty'
+                    );
+
 
                 /* ==================================================
                    SIGNATURE PAD
@@ -1463,6 +1956,9 @@
                     window.SignaturePad;
 
                 let signaturePad =
+                    null;
+
+                let greetingPad =
                     null;
 
 
@@ -1476,10 +1972,20 @@
                 let signatureSaved =
                     false;
 
+                let lastSavedSignatureData =
+                    null;
+
+                let lastSavedGreetingData =
+                    null;
+
 
                 /* ==================================================
-                   COUNTDOWN
+                   SHARED AUTO-SAVE COUNTDOWN
+                   8 SAAT SELEPAS AKTIVITI TERAKHIR
                 ================================================== */
+
+                const AUTO_SAVE_SECONDS =
+                    8;
 
                 let saveCountdownTimer =
                     null;
@@ -1644,22 +2150,121 @@
 
 
                 /* ==================================================
-                   INITIALIZE SIGNATURE PAD
+                   GREETING PLACEHOLDER
                 ================================================== */
 
-                function initializeSignaturePad() {
+                function updateGreetingPlaceholder() {
 
                     if (
-                        !signatureCanvas
+                        !greetingPlaceholder
                     ) {
 
-                        console.warn(
-                            'Canvas signature-pad tidak dijumpai.'
-                        );
-
-                        return false;
+                        return;
 
                     }
+
+                    const hasGreeting =
+                        greetingPad &&
+                        !greetingPad.isEmpty();
+
+                    greetingPlaceholder.classList.toggle(
+                        'hidden',
+                        hasGreeting
+                    );
+
+                }
+
+
+                /* ==================================================
+                   CANVAS INITIALIZER
+                ================================================== */
+
+                function prepareCanvas(
+                    canvas,
+                    backgroundColor,
+                    penColor,
+                    minWidth,
+                    maxWidth
+                ) {
+
+                    if (
+                        !canvas ||
+                        !SignaturePad
+                    ) {
+
+                        return null;
+
+                    }
+
+                    const rect =
+                        canvas.getBoundingClientRect();
+
+                    if (
+                        rect.width <= 0 ||
+                        rect.height <= 0
+                    ) {
+
+                        return null;
+
+                    }
+
+                    const ratio =
+                        Math.max(
+                            window.devicePixelRatio || 1,
+                            1
+                        );
+
+                    canvas.width =
+                        Math.round(
+                            rect.width * ratio
+                        );
+
+                    canvas.height =
+                        Math.round(
+                            rect.height * ratio
+                        );
+
+                    const context =
+                        canvas.getContext('2d');
+
+                    if (!context) {
+
+                        return null;
+
+                    }
+
+                    context.setTransform(
+                        1,
+                        0,
+                        0,
+                        1,
+                        0,
+                        0
+                    );
+
+                    context.scale(
+                        ratio,
+                        ratio
+                    );
+
+                    return new SignaturePad(
+                        canvas,
+                        {
+                            backgroundColor,
+                            penColor,
+                            minWidth,
+                            maxWidth
+                        }
+                    );
+
+                }
+
+
+                /* ==================================================
+                   SIGNATURE + GREETING INITIALIZATION
+                ================================================== */
+
+                function initializeDualPads() {
 
                     if (
                         !SignaturePad
@@ -1687,74 +2292,42 @@
 
                     }
 
-                    const rect =
-                        signatureCanvas.getBoundingClientRect();
+                    if (
+                        greetingPad &&
+                        typeof greetingPad.off ===
+                            'function'
+                    ) {
+
+                        greetingPad.off();
+
+                    }
+
+                    signaturePad =
+                        prepareCanvas(
+                            signatureCanvas,
+                            'rgb(255,255,255)',
+                            'rgb(17,24,39)',
+                            1,
+                            2.5
+                        );
+
+                    greetingPad =
+                        prepareCanvas(
+                            greetingCanvas,
+                            'rgb(255,255,255)',
+                            'rgb(17,24,39)',
+                            1,
+                            2.2
+                        );
 
                     if (
-                        rect.width <= 0 ||
-                        rect.height <= 0
+                        !signaturePad ||
+                        !greetingPad
                     ) {
 
                         return false;
 
                     }
-
-                    const ratio =
-                        Math.max(
-                            window.devicePixelRatio ||
-                                1,
-                            1
-                        );
-
-                    signatureCanvas.width =
-                        Math.round(
-                            rect.width *
-                            ratio
-                        );
-
-                    signatureCanvas.height =
-                        Math.round(
-                            rect.height *
-                            ratio
-                        );
-
-                    const context =
-                        signatureCanvas.getContext(
-                            '2d'
-                        );
-
-                    context.setTransform(
-                        1,
-                        0,
-                        0,
-                        1,
-                        0,
-                        0
-                    );
-
-                    context.scale(
-                        ratio,
-                        ratio
-                    );
-
-                    signaturePad =
-                        new SignaturePad(
-                            signatureCanvas,
-                            {
-                                backgroundColor:
-                                    'rgb(255,255,255)',
-
-                                penColor:
-                                    'rgb(17,24,39)',
-
-                                minWidth:
-                                    1,
-
-                                maxWidth:
-                                    2.5
-                            }
-                        );
-
 
                     signaturePad.addEventListener(
                         'beginStroke',
@@ -1773,7 +2346,6 @@
                         }
                     );
 
-
                     signaturePad.addEventListener(
                         'endStroke',
                         function () {
@@ -1786,18 +2358,48 @@
 
                             }
 
-                            if (
-                                signaturePad &&
-                                !signaturePad.isEmpty()
-                            ) {
-
-                                startAutoSaveCountdown();
-
-                            }
+                            startAutoSaveCountdown();
 
                         }
                     );
 
+                    greetingPad.addEventListener(
+                        'beginStroke',
+                        function () {
+
+                            if (
+                                signatureSaved
+                            ) {
+
+                                return;
+
+                            }
+
+                            stopAutoSaveCountdown();
+                            updateGreetingPlaceholder();
+
+                        }
+                    );
+
+                    greetingPad.addEventListener(
+                        'endStroke',
+                        function () {
+
+                            if (
+                                signatureSaved
+                            ) {
+
+                                return;
+
+                            }
+
+                            updateGreetingPlaceholder();
+                            startAutoSaveCountdown();
+
+                        }
+                    );
+
+                    updateGreetingPlaceholder();
 
                     return true;
 
@@ -1873,7 +2475,9 @@
 
 
                 /* ==================================================
-                   START COUNTDOWN
+                   START / RESTART SHARED COUNTDOWN
+                   - Signature WAJIB
+                   - Greeting OPTIONAL
                 ================================================== */
 
                 function startAutoSaveCountdown() {
@@ -1881,18 +2485,34 @@
                     stopAutoSaveCountdown();
 
                     if (
-                        !signaturePad ||
-                        signaturePad.isEmpty() ||
                         !currentSessionId ||
-                        signatureSaved
+                        signatureSaved ||
+                        !signaturePad ||
+                        signaturePad.isEmpty()
                     ) {
+
+                        if (
+                            signaturePad &&
+                            signaturePad.isEmpty() &&
+                            signatureCountdown
+                        ) {
+
+                            signatureCountdown.classList.remove(
+                                'ready',
+                                'error'
+                            );
+
+                            signatureCountdown.textContent =
+                                'Sila lengkapkan tandatangan.';
+
+                        }
 
                         return;
 
                     }
 
                     saveCountdownSeconds =
-                        5;
+                        AUTO_SAVE_SECONDS;
 
                     if (
                         signatureCountdown
@@ -1911,7 +2531,6 @@
 
                     updateCountdownText();
 
-
                     saveCountdownTimer =
                         setInterval(
                             function () {
@@ -1926,7 +2545,6 @@
                                 ) {
 
                                     stopAutoSaveCountdown();
-
                                     saveSignatureAutomatically();
 
                                 }
@@ -1939,7 +2557,7 @@
 
 
                 /* ==================================================
-                   CLEAR
+                   CLEAR — KEDUA-DUA PAD
                 ================================================== */
 
                 function clearSignature() {
@@ -1954,18 +2572,23 @@
 
                     stopAutoSaveCountdown();
 
-
                     if (
-                        !signaturePad
+                        signaturePad
                     ) {
 
-                        return;
+                        signaturePad.clear();
 
                     }
 
+                    if (
+                        greetingPad
+                    ) {
 
-                    signaturePad.clear();
+                        greetingPad.clear();
 
+                    }
+
+                    updateGreetingPlaceholder();
 
                     if (
                         signatureCountdown
@@ -2017,17 +2640,14 @@
 
                     }
 
-
                     signatureCountdown.classList.remove(
                         'active',
                         'ready'
                     );
 
-
                     signatureCountdown.classList.add(
                         'error'
                     );
-
 
                     signatureCountdown.textContent =
                         '❌ ' +
@@ -2037,7 +2657,7 @@
 
 
                 /* ==================================================
-                   SAVE SIGNATURE
+                   SAVE SIGNATURE + OPTIONAL GREETING
                 ================================================== */
 
                 async function saveSignatureAutomatically() {
@@ -2049,7 +2669,6 @@
                         return;
 
                     }
-
 
                     if (
                         !signaturePad
@@ -2063,19 +2682,17 @@
 
                     }
 
-
                     if (
                         signaturePad.isEmpty()
                     ) {
 
                         showSignatureError(
-                            'Signature kosong.'
+                            'Tandatangan wajib diisi.'
                         );
 
                         return;
 
                     }
-
 
                     if (
                         !currentSessionId
@@ -2089,16 +2706,19 @@
 
                     }
 
-
                     const signatureData =
                         signaturePad.toDataURL(
                             'image/png'
                         );
 
+                    const greetingData =
+                        greetingPad &&
+                        !greetingPad.isEmpty()
+                            ? greetingPad.toDataURL('image/png')
+                            : null;
 
                     const saveUrl =
                         `/guestbook/signing-sessions/${currentSessionId}/signature`;
-
 
                     if (
                         signatureCountdown
@@ -2118,7 +2738,6 @@
 
                     }
 
-
                     if (
                         clearSignatureButton
                     ) {
@@ -2127,18 +2746,6 @@
                             true;
 
                     }
-
-
-                    /*
-                    |------------------------------------------------------
-                    | Dapatkan CSRF token TERKINI daripada session Laravel.
-                    |
-                    | Page tablet boleh dibiarkan terbuka lama. Jadi token
-                    | yang berada pada page mungkin sudah tidak sepadan
-                    | dengan session semasa. Kita refresh token dahulu
-                    | sebelum POST.
-                    |------------------------------------------------------
-                    */
 
                     async function getFreshCsrfToken() {
 
@@ -2151,7 +2758,6 @@
                             )
                             + '_csrf_refresh='
                             + Date.now();
-
 
                         const tokenResponse =
                             await fetch(
@@ -2182,7 +2788,6 @@
                                 }
                             );
 
-
                         if (
                             !tokenResponse.ok
                         ) {
@@ -2193,10 +2798,8 @@
 
                         }
 
-
                         const tokenHtml =
                             await tokenResponse.text();
-
 
                         const tokenDocument =
                             new DOMParser()
@@ -2204,7 +2807,6 @@
                                     tokenHtml,
                                     'text/html'
                                 );
-
 
                         const token =
                             tokenDocument
@@ -2214,7 +2816,6 @@
                                 ?.getAttribute(
                                     'content'
                                 );
-
 
                         if (
                             !token
@@ -2226,18 +2827,10 @@
 
                         }
 
-
-                        /*
-                        |--------------------------------------------------
-                        | Kemaskini token pada page semasa.
-                        |--------------------------------------------------
-                        */
-
                         const currentMeta =
                             document.querySelector(
                                 'meta[name="csrf-token"]'
                             );
-
 
                         if (
                             currentMeta
@@ -2250,17 +2843,9 @@
 
                         }
 
-
                         return token;
 
                     }
-
-
-                    /*
-                    |------------------------------------------------------
-                    | Hantar signature.
-                    |------------------------------------------------------
-                    */
 
                     async function postSignature(
                         token
@@ -2293,7 +2878,10 @@
                                     JSON.stringify(
                                         {
                                             signature:
-                                                signatureData
+                                                signatureData,
+
+                                            greeting:
+                                                greetingData
                                         }
                                     )
                             }
@@ -2301,32 +2889,15 @@
 
                     }
 
-
                     try {
-
-                        /*
-                        |==================================================
-                        | CUBA 1 — token baharu
-                        |==================================================
-                        */
 
                         let csrfToken =
                             await getFreshCsrfToken();
-
 
                         let response =
                             await postSignature(
                                 csrfToken
                             );
-
-
-                        /*
-                        |==================================================
-                        | CUBA 2 — jika masih 419
-                        |
-                        | Refresh token sekali lagi dan hantar semula.
-                        |==================================================
-                        */
 
                         if (
                             response.status ===
@@ -2337,10 +2908,8 @@
                                 'CSRF mismatch 419. Refresh token dan cuba semula...'
                             );
 
-
                             csrfToken =
                                 await getFreshCsrfToken();
-
 
                             response =
                                 await postSignature(
@@ -2349,15 +2918,12 @@
 
                         }
 
-
                         const contentType =
                             response.headers.get(
                                 'content-type'
                             ) ?? '';
 
-
                         let data;
-
 
                         if (
                             contentType.includes(
@@ -2373,7 +2939,6 @@
                             const responseText =
                                 await response.text();
 
-
                             if (
                                 response.status ===
                                 419
@@ -2385,14 +2950,12 @@
 
                             }
 
-
                             throw new Error(
                                 responseText ||
                                 'Respons server tidak sah.'
                             );
 
                         }
-
 
                         if (
                             !response.ok
@@ -2409,7 +2972,6 @@
 
                             }
 
-
                             throw new Error(
                                 data?.message ??
                                 'Gagal menyimpan tandatangan.'
@@ -2417,14 +2979,16 @@
 
                         }
 
-
-                        /* ==================================================
-                           SAVE BERJAYA
-                        ================================================== */
-
                         signatureSaved =
                             true;
 
+                        lastSavedSignatureData =
+                            signatureData;
+
+                        lastSavedGreetingData =
+                            greetingData;
+
+                        stopAutoSaveCountdown();
 
                         if (
                             signaturePad &&
@@ -2436,10 +3000,18 @@
 
                         }
 
+                        if (
+                            greetingPad &&
+                            typeof greetingPad.off ===
+                                'function'
+                        ) {
+
+                            greetingPad.off();
+
+                        }
 
                         const savedAt =
                             new Date();
-
 
                         if (
                             signatureDate
@@ -2452,7 +3024,6 @@
 
                         }
 
-
                         if (
                             signatureTime
                         ) {
@@ -2463,7 +3034,6 @@
                                 );
 
                         }
-
 
                         if (
                             signatureCountdown
@@ -2479,10 +3049,11 @@
                             );
 
                             signatureCountdown.textContent =
-                                '✅ Tandatangan berjaya direkodkan.';
+                                greetingData
+                                    ? '✅ Tandatangan & ucapan berjaya direkodkan.'
+                                    : '✅ Tandatangan berjaya direkodkan.';
 
                         }
-
 
                         if (
                             clearSignatureButton
@@ -2492,12 +3063,6 @@
                                 true;
 
                         }
-
-
-                        /*
-                         * KEMBALI muncul di penjuru
-                         * kanan atas signature pad.
-                         */
 
                         if (
                             backButton
@@ -2509,12 +3074,22 @@
 
                         }
 
+                        if (
+                            previewSignatureButton
+                        ) {
+
+                            previewSignatureButton.classList.add(
+                                'visible'
+                            );
+
+                        }
+
+                        updateGreetingPlaceholder();
 
                         console.log(
-                            'Signature berjaya disimpan.',
+                            'Signature + greeting berjaya disimpan.',
                             data
                         );
-
 
                     } catch (
                         error
@@ -2525,7 +3100,6 @@
                             error
                         );
 
-
                         if (
                             clearSignatureButton
                         ) {
@@ -2535,7 +3109,6 @@
 
                         }
 
-
                         showSignatureError(
                             error.message ??
                             'Gagal menyimpan tandatangan.'
@@ -2544,6 +3117,241 @@
                     }
 
                 }
+
+
+                /* ==================================================
+                   PAPAR — PREVIEW
+                ================================================== */
+
+                function openSignaturePreview() {
+
+                    if (!previewModal) {
+
+                        return;
+
+                    }
+
+                    /*
+                    |------------------------------------------------------
+                    | PAPAR boleh digunakan SEMASA signing masih berjalan.
+                    | Jika sudah disimpan, guna data terakhir yang disimpan.
+                    | Jika belum disimpan, ambil terus dari canvas semasa.
+                    |------------------------------------------------------
+                    */
+
+                    let signatureData =
+                        lastSavedSignatureData;
+
+                    let greetingData =
+                        lastSavedGreetingData;
+
+
+                    if (
+                        !signatureData &&
+                        signaturePad &&
+                        !signaturePad.isEmpty()
+                    ) {
+
+                        signatureData =
+                            signaturePad.toDataURL(
+                                'image/png'
+                            );
+
+                    }
+
+
+                    if (
+                        !signatureData
+                    ) {
+
+                        showSignatureError(
+                            'Sila tandatangan dahulu sebelum tekan PAPAR.'
+                        );
+
+                        return;
+
+                    }
+
+
+                    if (
+                        !greetingData &&
+                        greetingPad &&
+                        !greetingPad.isEmpty()
+                    ) {
+
+                        greetingData =
+                            greetingPad.toDataURL(
+                                'image/png'
+                            );
+
+                    }
+
+
+                    if (
+                        previewSignatureImage
+                    ) {
+
+                        previewSignatureImage.src =
+                            signatureData;
+
+                    }
+
+
+                    if (
+                        previewGreetingImage &&
+                        previewGreetingEmpty
+                    ) {
+
+                        if (
+                            greetingData
+                        ) {
+
+                            previewGreetingImage.src =
+                                greetingData;
+
+                            previewGreetingImage.style.display =
+                                'block';
+
+                            previewGreetingEmpty.style.display =
+                                'none';
+
+                        } else {
+
+                            previewGreetingImage.removeAttribute(
+                                'src'
+                            );
+
+                            previewGreetingImage.style.display =
+                                'none';
+
+                            previewGreetingEmpty.style.display =
+                                'flex';
+
+                            previewGreetingEmpty.style.alignItems =
+                                'center';
+
+                            previewGreetingEmpty.style.justifyContent =
+                                'center';
+
+                            previewGreetingEmpty.style.width =
+                                '100%';
+
+                            previewGreetingEmpty.style.height =
+                                '100%';
+
+                        }
+
+                    }
+
+
+                    previewModal.classList.add(
+                        'visible'
+                    );
+
+                    previewModal.setAttribute(
+                        'aria-hidden',
+                        'false'
+                    );
+
+                }
+
+
+                function closeSignaturePreview() {
+
+                    if (
+                        !previewModal
+                    ) {
+
+                        return;
+
+                    }
+
+                    previewModal.classList.remove(
+                        'visible'
+                    );
+
+                    previewModal.setAttribute(
+                        'aria-hidden',
+                        'true'
+                    );
+
+                }
+
+
+                if (
+                    previewSignatureButton
+                ) {
+
+                    previewSignatureButton.addEventListener(
+                        'click',
+                        function () {
+
+                            openSignaturePreview();
+
+                        }
+                    );
+
+                }
+
+
+                if (
+                    closePreviewButton
+                ) {
+
+                    closePreviewButton.addEventListener(
+                        'click',
+                        function () {
+
+                            closeSignaturePreview();
+
+                        }
+                    );
+
+                }
+
+
+                if (
+                    previewModal
+                ) {
+
+                    previewModal.addEventListener(
+                        'click',
+                        function (
+                            event
+                        ) {
+
+                            if (
+                                event.target ===
+                                previewModal
+                            ) {
+
+                                closeSignaturePreview();
+
+                            }
+
+                        }
+                    );
+
+                }
+
+
+                document.addEventListener(
+                    'keydown',
+                    function (
+                        event
+                    ) {
+
+                        if (
+                            event.key ===
+                            'Escape'
+                        ) {
+
+                            closeSignaturePreview();
+
+                        }
+
+                    }
+                );
 
 
                 /* ==================================================
@@ -2568,22 +3376,35 @@
 
                     }
 
-
                     const signer =
                         data.signer;
-
 
                     currentSessionId =
                         data.session_id ??
                         null;
 
-
                     signatureSaved =
                         false;
 
+                    lastSavedSignatureData =
+                        null;
+
+                    lastSavedGreetingData =
+                        null;
+
+                    closeSignaturePreview();
+
+                    if (
+                        previewSignatureButton
+                    ) {
+
+                        previewSignatureButton.classList.add(
+                            'visible'
+                        );
+
+                    }
 
                     stopAutoSaveCountdown();
-
 
                     if (
                         waitingPanel
@@ -2594,7 +3415,6 @@
 
                     }
 
-
                     if (
                         signContent
                     ) {
@@ -2603,7 +3423,6 @@
                             'grid';
 
                     }
-
 
                     if (
                         backButton
@@ -2615,7 +3434,6 @@
 
                     }
 
-
                     if (
                         clearSignatureButton
                     ) {
@@ -2624,7 +3442,6 @@
                             false;
 
                     }
-
 
                     if (
                         signerName
@@ -2636,7 +3453,6 @@
 
                     }
 
-
                     if (
                         signerPosition
                     ) {
@@ -2647,10 +3463,8 @@
 
                     }
 
-
                     const now =
                         new Date();
-
 
                     if (
                         signatureDate
@@ -2663,7 +3477,6 @@
 
                     }
 
-
                     if (
                         signatureTime
                     ) {
@@ -2675,34 +3488,50 @@
 
                     }
 
-
-                    if (
-                        signaturePad
-                    ) {
-
-                        if (
-                            typeof signaturePad.off ===
-                                'function'
-                        ) {
-
-                            signaturePad.off();
-
-                        }
-
-
-                        signaturePad.clear();
-
-                    }
-
-
                     requestAnimationFrame(
                         function () {
 
-                            initializeSignaturePad();
+                            if (
+                                signaturePad &&
+                                typeof signaturePad.off ===
+                                    'function'
+                            ) {
+
+                                signaturePad.off();
+
+                            }
+
+                            if (
+                                greetingPad &&
+                                typeof greetingPad.off ===
+                                    'function'
+                            ) {
+
+                                greetingPad.off();
+
+                            }
+
+                            if (
+                                signaturePad
+                            ) {
+
+                                signaturePad.clear();
+
+                            }
+
+                            if (
+                                greetingPad
+                            ) {
+
+                                greetingPad.clear();
+
+                            }
+
+                            initializeDualPads();
+                            updateGreetingPlaceholder();
 
                         }
                     );
-
 
                     console.log(
                         'Signing session diterima:',
@@ -2720,33 +3549,67 @@
 
                     stopAutoSaveCountdown();
 
-
                     currentSessionId =
                         null;
-
 
                     signatureSaved =
                         false;
 
+                    lastSavedSignatureData =
+                        null;
+
+                    lastSavedGreetingData =
+                        null;
+
+                    closeSignaturePreview();
+
+                    if (
+                        previewSignatureButton
+                    ) {
+
+                        previewSignatureButton.classList.remove(
+                            'visible'
+                        );
+
+                    }
+
+                    if (
+                        signaturePad &&
+                        typeof signaturePad.off ===
+                            'function'
+                    ) {
+
+                        signaturePad.off();
+
+                    }
+
+                    if (
+                        greetingPad &&
+                        typeof greetingPad.off ===
+                            'function'
+                    ) {
+
+                        greetingPad.off();
+
+                    }
 
                     if (
                         signaturePad
                     ) {
 
-                        if (
-                            typeof signaturePad.off ===
-                                'function'
-                        ) {
-
-                            signaturePad.off();
-
-                        }
-
-
                         signaturePad.clear();
 
                     }
 
+                    if (
+                        greetingPad
+                    ) {
+
+                        greetingPad.clear();
+
+                    }
+
+                    updateGreetingPlaceholder();
 
                     if (
                         signContent
@@ -2757,7 +3620,6 @@
 
                     }
 
-
                     if (
                         waitingPanel
                     ) {
@@ -2766,7 +3628,6 @@
                             'flex';
 
                     }
-
 
                     if (
                         signerName
@@ -2777,7 +3638,6 @@
 
                     }
 
-
                     if (
                         signerPosition
                     ) {
@@ -2786,7 +3646,6 @@
                             '-';
 
                     }
-
 
                     if (
                         signatureDate
@@ -2799,7 +3658,6 @@
 
                     }
 
-
                     if (
                         signatureTime
                     ) {
@@ -2811,7 +3669,6 @@
 
                     }
 
-
                     if (
                         backButton
                     ) {
@@ -2822,7 +3679,6 @@
 
                     }
 
-
                     if (
                         clearSignatureButton
                     ) {
@@ -2831,7 +3687,6 @@
                             false;
 
                     }
-
 
                     if (
                         signatureCountdown
@@ -2847,7 +3702,6 @@
                         );
 
                     }
-
 
                     console.log(
                         'Kembali ke page menunggu tandatangan.'
@@ -2893,7 +3747,6 @@
 
                             break;
 
-
                         case 'connecting':
 
                             setRealtimeStatus(
@@ -2902,7 +3755,6 @@
                             );
 
                             break;
-
 
                         case 'disconnected':
 
@@ -2913,7 +3765,6 @@
 
                             break;
 
-
                         case 'unavailable':
 
                             setRealtimeStatus(
@@ -2923,7 +3774,6 @@
 
                             break;
 
-
                         case 'failed':
 
                             setRealtimeStatus(
@@ -2932,7 +3782,6 @@
                             );
 
                             break;
-
 
                         default:
 
@@ -2960,7 +3809,6 @@
 
                     }
 
-
                     if (
                         !window.Echo
                     ) {
@@ -2974,12 +3822,10 @@
 
                     }
 
-
                     const pusher =
                         window.Echo
                             .connector
                             ?.pusher;
-
 
                     if (
                         !pusher
@@ -2994,15 +3840,12 @@
 
                     }
 
-
                     realtimeInitialized =
                         true;
-
 
                     updateRealtimeConnectionState(
                         pusher.connection.state
                     );
-
 
                     pusher.connection.bind(
                         'state_change',
@@ -3017,18 +3860,15 @@
                         }
                     );
 
-
                     const channel =
                         window.Echo.channel(
                             channelName
                         );
 
-
                     console.log(
                         'Tablet subscribed:',
                         channelName
                     );
-
 
                     channel.listen(
                         '.signing.session.opened',
@@ -3040,7 +3880,6 @@
                                 'Signing session diterima:',
                                 data
                             );
-
 
                             showSigner(
                                 data
@@ -3065,14 +3904,6 @@
                                 data
                             );
 
-
-                            /*
-                            |----------------------------------------------------------
-                            | Pastikan event cancellation adalah untuk session
-                            | yang sedang dipaparkan pada tablet.
-                            |----------------------------------------------------------
-                            */
-
                             if (
                                 currentSessionId &&
                                 data &&
@@ -3090,38 +3921,66 @@
 
                             }
 
-
-                            /*
-                            |----------------------------------------------------------
-                            | JANGAN terus kembali ke waiting.
-                            | Apabila Admin tekan CANCEL, tablet kekal pada paparan
-                            | tandatangan dan hanya keluarkan button KEMBALI.
-                            | Pengguna tablet perlu tekan KEMBALI untuk kembali
-                            | ke skrin Menunggu Permintaan Tandatangan.
-                            |----------------------------------------------------------
-                            */
-
                             stopAutoSaveCountdown();
 
+                            if (
+                                signaturePad &&
+                                typeof signaturePad.off ===
+                                    'function'
+                            ) {
+
+                                signaturePad.off();
+
+                            }
+
+                            if (
+                                greetingPad &&
+                                typeof greetingPad.off ===
+                                    'function'
+                            ) {
+
+                                greetingPad.off();
+
+                            }
 
                             if (
                                 signaturePad
                             ) {
 
-                                if (
-                                    typeof signaturePad.off ===
-                                        'function'
-                                ) {
-
-                                    signaturePad.off();
-
-                                }
-
-
                                 signaturePad.clear();
 
                             }
 
+                            if (
+                                greetingPad
+                            ) {
+
+                                greetingPad.clear();
+
+                            }
+
+                            updateGreetingPlaceholder();
+
+                            signatureSaved =
+                                false;
+
+                            lastSavedSignatureData =
+                                null;
+
+                            lastSavedGreetingData =
+                                null;
+
+                            closeSignaturePreview();
+
+                            if (
+                                previewSignatureButton
+                            ) {
+
+                                previewSignatureButton.classList.add(
+                                    'visible'
+                                );
+
+                            }
 
                             if (
                                 signContent
@@ -3132,7 +3991,6 @@
 
                             }
 
-
                             if (
                                 waitingPanel
                             ) {
@@ -3142,7 +4000,6 @@
 
                             }
 
-
                             if (
                                 clearSignatureButton
                             ) {
@@ -3151,7 +4008,6 @@
                                     true;
 
                             }
-
 
                             if (
                                 signatureCountdown
@@ -3172,7 +4028,6 @@
 
                             }
 
-
                             if (
                                 backButton
                             ) {
@@ -3183,7 +4038,6 @@
 
                             }
 
-
                             console.log(
                                 'Button KEMBALI dipaparkan pada tablet selepas Admin CANCEL.'
                             );
@@ -3193,7 +4047,7 @@
 
 
                     /* =================================================
-                       REMOTE CLEAR
+                       REMOTE CLEAR — KEDUA-DUA PAD
                     ================================================== */
 
                     channel.listen(
@@ -3207,7 +4061,6 @@
                                 data
                             );
 
-
                             if (
                                 data &&
                                 data.session_id
@@ -3218,32 +4071,66 @@
 
                             }
 
-
                             signatureSaved =
                                 false;
 
+                            lastSavedSignatureData =
+                                null;
+
+                            lastSavedGreetingData =
+                                null;
+
+                            closeSignaturePreview();
+
+                            if (
+                                previewSignatureButton
+                            ) {
+
+                                previewSignatureButton.classList.add(
+                                    'visible'
+                                );
+
+                            }
 
                             stopAutoSaveCountdown();
 
+                            if (
+                                signaturePad &&
+                                typeof signaturePad.off ===
+                                    'function'
+                            ) {
+
+                                signaturePad.off();
+
+                            }
+
+                            if (
+                                greetingPad &&
+                                typeof greetingPad.off ===
+                                    'function'
+                            ) {
+
+                                greetingPad.off();
+
+                            }
 
                             if (
                                 signaturePad
                             ) {
 
-                                if (
-                                    typeof signaturePad.off ===
-                                        'function'
-                                ) {
-
-                                    signaturePad.off();
-
-                                }
-
-
                                 signaturePad.clear();
 
                             }
 
+                            if (
+                                greetingPad
+                            ) {
+
+                                greetingPad.clear();
+
+                            }
+
+                            updateGreetingPlaceholder();
 
                             if (
                                 backButton
@@ -3255,7 +4142,6 @@
 
                             }
 
-
                             if (
                                 clearSignatureButton
                             ) {
@@ -3264,16 +4150,6 @@
                                     false;
 
                             }
-
-
-                            requestAnimationFrame(
-                                function () {
-
-                                    initializeSignaturePad();
-
-                                }
-                            );
-
 
                             if (
                                 signatureCountdown
@@ -3289,13 +4165,20 @@
                                 );
 
                                 signatureCountdown.textContent =
-                                    '✕ Tandatangan telah di-CLEAR oleh Admin. Sila tandatangan semula.';
+                                    '✕ Tandatangan & ucapan telah di-CLEAR oleh Admin. Sila isi semula.';
 
                             }
 
+                            requestAnimationFrame(
+                                function () {
+
+                                    initializeDualPads();
+
+                                }
+                            );
+
                         }
                     );
-
 
                     return true;
 
@@ -3313,8 +4196,8 @@
                     ) {
 
                         if (
-                            event.target !==
-                            signatureCanvas
+                            event.target !== signatureCanvas &&
+                            event.target !== greetingCanvas
                         ) {
 
                             event.preventDefault();
@@ -3327,7 +4210,6 @@
                             false
                     }
                 );
-
 
                 document.addEventListener(
                     'touchstart',
@@ -3351,7 +4233,6 @@
                     }
                 );
 
-
                 document.addEventListener(
                     'gesturestart',
                     function (
@@ -3366,7 +4247,6 @@
                             false
                     }
                 );
-
 
                 document.addEventListener(
                     'contextmenu',
@@ -3416,7 +4296,6 @@
                     }
 
                 }
-
 
                 requestLandscape();
 

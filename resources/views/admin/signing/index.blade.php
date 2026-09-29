@@ -191,16 +191,6 @@
             background: #b91c1c;
         }
 
-        .btn-cancel {
-            background: #d97706;
-            color: #ffffff;
-            border: 1px solid #d97706;
-        }
-
-        .btn-cancel:hover {
-            background: #b45309;
-        }
-
         .btn-secondary {
             background: #374151;
             color: #ffffff;
@@ -504,6 +494,68 @@
             color: #6b7280;
             font-size: 12px;
             line-height: 1.6;
+        }
+
+        .signature-previews {
+            margin-top: 22px;
+            display: grid;
+            grid-template-columns: minmax(0, 3fr) minmax(260px, 1fr);
+            gap: 18px;
+            align-items: stretch;
+        }
+
+        .signature-preview-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            background: #ffffff;
+            overflow: hidden;
+        }
+
+        .signature-preview-label {
+            padding: 11px 14px;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f9fafb;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: .3px;
+            color: #374151;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .signature-preview {
+            margin-top: 0;
+            min-height: 280px;
+            border: 0;
+            border-radius: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+            padding: 18px;
+        }
+
+        .signature-preview img {
+            display: block;
+            max-width: 100%;
+            max-height: 360px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .signature-preview.empty {
+            min-height: 280px;
+            color: #9ca3af;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        @media (max-width: 900px) {
+            .signature-previews {
+                grid-template-columns: 1fr;
+            }
         }
 
         @media (max-width: 700px) {
@@ -835,32 +887,6 @@
 
 
                                         {{-- ====================================================
-                                             CANCEL SIGN
-                                        ===================================================== --}}
-
-                                        <form
-                                            method="POST"
-                                            action="{{ route('admin.events.signing.cancel', [
-                                                'event' => $event->id,
-                                                'signer' => $signer->id,
-                                            ]) }}"
-                                            onsubmit="return confirm('Batalkan sesi tandatangan untuk {{ $signer->name }}? Tablet akan kembali ke skrin Menunggu Permintaan Tandatangan.')"
-                                        >
-
-                                            @csrf
-
-                                            <button
-                                                type="submit"
-                                                class="btn btn-cancel"
-                                                {{ $activeSession ? '' : 'disabled' }}
-                                            >
-                                                ❌ Cancel Sign
-                                            </button>
-
-                                        </form>
-
-
-                                        {{-- ====================================================
                                              PAPAR SIGN
                                         ===================================================== --}}
 
@@ -870,6 +896,7 @@
                                                 type="button"
                                                 class="btn btn-secondary btn-view-signature"
                                                 data-signature-url="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($latestSignature->signature_path) }}"
+                                                data-greeting-url="{{ !empty($latestSignature->greeting_path) ? \Illuminate\Support\Facades\Storage::disk('public')->url($latestSignature->greeting_path) : '' }}"
                                                 data-signer-name="{{ $signer->name }}"
                                                 data-signer-position="{{ $signer->position ?? '' }}"
                                                 data-signer-organization="{{ $signer->organization ?? '' }}"
@@ -1284,7 +1311,7 @@
                 id="signature-modal-title"
                 class="signature-modal-title"
             >
-                Papar Tandatangan
+                Papar Tandatangan & Catatan
             </div>
 
             <button
@@ -1313,13 +1340,41 @@
 
             </div>
 
-            <div class="signature-preview">
+            <div class="signature-previews">
 
-                <img
-                    id="modal-signature-image"
-                    src=""
-                    alt="Tandatangan digital"
-                >
+                <div class="signature-preview-card">
+
+                    <div class="signature-preview-label">
+                        Tandatangan
+                    </div>
+
+                    <div class="signature-preview">
+
+                        <img
+                            id="modal-signature-image"
+                            src=""
+                            alt="Tandatangan digital"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="signature-preview-card">
+
+                    <div class="signature-preview-label">
+                        Catatan / Ucapan
+                    </div>
+
+                    <div
+                        id="modal-greeting-preview"
+                        class="signature-preview empty"
+                    >
+                        Tiada catatan direkodkan.
+                    </div>
+
+                </div>
 
             </div>
 
@@ -1555,6 +1610,10 @@
                 'modal-signature-image'
             );
 
+            const greetingPreview = document.getElementById(
+                'modal-greeting-preview'
+            );
+
             const signerName = document.getElementById(
                 'modal-signer-name'
             );
@@ -1583,6 +1642,12 @@
 
                 if (image) {
                     image.removeAttribute('src');
+                }
+
+                if (greetingPreview) {
+                    greetingPreview.innerHTML =
+                        'Tiada catatan direkodkan.';
+                    greetingPreview.classList.add('empty');
                 }
 
             }
@@ -1625,6 +1690,31 @@
                                     image.src =
                                         button.dataset.signatureUrl
                                         || '';
+
+                                }
+
+
+                                if (greetingPreview) {
+
+                                    const greetingUrl =
+                                        button.dataset.greetingUrl
+                                        || '';
+
+                                    if (greetingUrl) {
+
+                                        greetingPreview.classList.remove('empty');
+                                        greetingPreview.innerHTML =
+                                            '<img src="' +
+                                            greetingUrl.replaceAll('"', '&quot;') +
+                                            '" alt="Catatan / Ucapan">';
+
+                                    } else {
+
+                                        greetingPreview.classList.add('empty');
+                                        greetingPreview.textContent =
+                                            'Tiada catatan direkodkan.';
+
+                                    }
 
                                 }
 

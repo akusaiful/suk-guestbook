@@ -14,9 +14,6 @@ class SignatureController extends Controller
 {
     /**
      * Simpan tandatangan digital untuk signing session.
-     *
-     * Signature = WAJIB
-     * Greeting  = OPTIONAL
      */
     public function store(
         Request $request,
@@ -35,6 +32,7 @@ class SignatureController extends Controller
             ], 422);
         }
 
+
         /*
         |--------------------------------------------------------------------------
         | Elakkan tandatangan berganda untuk session yang sama
@@ -48,15 +46,13 @@ class SignatureController extends Controller
             ], 422);
         }
 
+
         /*
         |--------------------------------------------------------------------------
-        | Validate Signature + Greeting
+        | Validate Signature
         |--------------------------------------------------------------------------
         |
-        | Signature = WAJIB
-        | Greeting  = OPTIONAL
-        |
-        | Kedua-duanya dihantar sebagai PNG Data URL:
+        | Tandatangan dihantar sebagai:
         |
         | data:image/png;base64,....
         |
@@ -69,27 +65,23 @@ class SignatureController extends Controller
                 'string',
                 'max:1000000',
             ],
-
-            'greeting' => [
-                'nullable',
-                'string',
-                'max:1000000',
-            ],
         ]);
+
 
         /*
         |--------------------------------------------------------------------------
-        | Validate Signature PNG
+        | Pastikan format ialah PNG Data URL
         |--------------------------------------------------------------------------
         */
 
         $signatureData = $validated['signature'];
 
+
         if (
             !preg_match(
                 '/^data:image\/png;base64,(.+)$/',
                 $signatureData,
-                $signatureMatches
+                $matches
             )
         ) {
             return response()->json([
@@ -98,33 +90,36 @@ class SignatureController extends Controller
             ], 422);
         }
 
+
         /*
         |--------------------------------------------------------------------------
-        | Decode Signature Base64
+        | Decode Base64
         |--------------------------------------------------------------------------
         */
 
-        $signatureImageData = base64_decode(
-            $signatureMatches[1],
+        $imageData = base64_decode(
+            $matches[1],
             true
         );
 
-        if ($signatureImageData === false) {
+
+        if ($imageData === false) {
             return response()->json([
                 'success' => false,
                 'message' => 'Data tandatangan tidak dapat dibaca.',
             ], 422);
         }
 
+
         /*
         |--------------------------------------------------------------------------
-        | Pastikan Signature benar-benar PNG
+        | Pastikan data PNG benar-benar bermula dengan PNG signature
         |--------------------------------------------------------------------------
         */
 
         if (
             !str_starts_with(
-                $signatureImageData,
+                $imageData,
                 "\x89PNG\r\n\x1a\n"
             )
         ) {
@@ -134,69 +129,6 @@ class SignatureController extends Controller
             ], 422);
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Greeting OPTIONAL
-        |--------------------------------------------------------------------------
-        */
-
-        $greetingImageData = null;
-
-        if (
-            isset($validated['greeting']) &&
-            filled($validated['greeting'])
-        ) {
-            $greetingData = $validated['greeting'];
-
-            if (
-                !preg_match(
-                    '/^data:image\/png;base64,(.+)$/',
-                    $greetingData,
-                    $greetingMatches
-                )
-            ) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Format ucapan tidak sah.',
-                ], 422);
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Decode Greeting Base64
-            |--------------------------------------------------------------------------
-            */
-
-            $greetingImageData = base64_decode(
-                $greetingMatches[1],
-                true
-            );
-
-            if ($greetingImageData === false) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Data ucapan tidak dapat dibaca.',
-                ], 422);
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Pastikan Greeting benar-benar PNG
-            |--------------------------------------------------------------------------
-            */
-
-            if (
-                !str_starts_with(
-                    $greetingImageData,
-                    "\x89PNG\r\n\x1a\n"
-                )
-            ) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Fail ucapan bukan PNG yang sah.',
-                ], 422);
-            }
-        }
 
         /*
         |--------------------------------------------------------------------------
@@ -206,97 +138,54 @@ class SignatureController extends Controller
 
         $signedAt = now();
 
-        $directory = 'signatures/' . $session->event_id;
 
-        /*
-        |--------------------------------------------------------------------------
-        | Signature filename
-        |--------------------------------------------------------------------------
-        */
+        $directory =
+            'signatures/' .
+            $session->event_id;
 
-        $signatureFilename =
+
+        $filename =
             'session_' .
             $session->id .
             '_' .
             Str::uuid() .
             '.png';
 
-        $signaturePath =
+
+        $path =
             $directory .
             '/' .
-            $signatureFilename;
+            $filename;
 
-        /*
-        |--------------------------------------------------------------------------
-        | Greeting filename
-        |--------------------------------------------------------------------------
-        */
-
-        $greetingPath = null;
-
-        if ($greetingImageData !== null) {
-            $greetingFilename =
-                'session_' .
-                $session->id .
-                '_greeting_' .
-                Str::uuid() .
-                '.png';
-
-            $greetingPath =
-                $directory .
-                '/' .
-                $greetingFilename;
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Database Transaction
-        |--------------------------------------------------------------------------
-        */
 
         DB::transaction(function () use (
             $session,
-            $signatureImageData,
-            $signaturePath,
-            $greetingImageData,
-            $greetingPath,
+            $imageData,
+            $path,
             $signedAt
         ) {
+
             /*
             |--------------------------------------------------------------------------
-            | Simpan Signature PNG
+            | Simpan PNG
             |--------------------------------------------------------------------------
             */
 
-            $signatureStored = Storage::disk('public')->put(
-                $signaturePath,
-                $signatureImageData
-            );
+            $stored =
+                Storage::disk('public')->put(
+                    $path,
+                    $imageData
+                );
 
-            if (!$signatureStored) {
+
+            if (!$stored) {
+
                 throw new \RuntimeException(
                     'Fail tandatangan gagal disimpan.'
                 );
+
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Simpan Greeting PNG jika ada
-            |--------------------------------------------------------------------------
-            */
-
-            if ($greetingImageData !== null && $greetingPath !== null) {
-                $greetingStored = Storage::disk('public')->put(
-                    $greetingPath,
-                    $greetingImageData
-                );
-
-                if (!$greetingStored) {
-                    throw new \RuntimeException(
-                        'Fail ucapan gagal disimpan.'
-                    );
-                }
-            }
 
             /*
             |--------------------------------------------------------------------------
@@ -305,11 +194,16 @@ class SignatureController extends Controller
             */
 
             Signature::create([
-                'signing_session_id' => $session->id,
-                'signature_path' => $signaturePath,
-                'greeting_path' => $greetingPath,
-                'signed_at' => $signedAt,
+                'signing_session_id' =>
+                    $session->id,
+
+                'signature_path' =>
+                    $path,
+
+                'signed_at' =>
+                    $signedAt,
             ]);
+
 
             /*
             |--------------------------------------------------------------------------
@@ -318,10 +212,15 @@ class SignatureController extends Controller
             */
 
             $session->update([
-                'status' => 'signed',
-                'signed_at' => $signedAt,
+                'status' =>
+                    'signed',
+
+                'signed_at' =>
+                    $signedAt,
             ]);
+
         });
+
 
         /*
         |--------------------------------------------------------------------------
@@ -345,10 +244,7 @@ class SignatureController extends Controller
                 $signedAt->toIso8601String(),
 
             'signature_path' =>
-                $signaturePath,
-
-            'greeting_path' =>
-                $greetingPath,
+                $path,
         ]);
     }
 }

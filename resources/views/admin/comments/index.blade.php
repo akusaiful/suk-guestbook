@@ -161,6 +161,115 @@
         }
 
         /* =========================================================
+           FILTER & CARIAN EVENT
+        ========================================================= */
+
+        .filter-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 20px 22px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
+        }
+
+        .filter-title {
+            font-size: 13px;
+            font-weight: 800;
+            color: #111827;
+            margin-bottom: 14px;
+        }
+
+        .filter-form {
+            display: flex;
+            align-items: flex-end;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            flex: 1 1 320px;
+            min-width: 280px;
+        }
+
+        .filter-search {
+            flex: 1 1 420px;
+            min-width: 320px;
+        }
+
+        .filter-label {
+            display: block;
+            margin-bottom: 7px;
+            font-size: 12px;
+            font-weight: 800;
+            color: #4b5563;
+        }
+
+        .filter-select,
+        .filter-input {
+            width: 100%;
+            min-height: 44px;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 9px;
+            background: #ffffff;
+            color: #111827;
+            font-size: 13px;
+        }
+
+        .filter-select:focus,
+        .filter-input:focus {
+            outline: none;
+            border-color: #861b24;
+            box-shadow: 0 0 0 3px rgba(134, 27, 36, 0.10);
+        }
+
+        .filter-button,
+        .reset-filter-button {
+            min-height: 44px;
+            padding: 10px 16px;
+            border-radius: 9px;
+            font-size: 13px;
+            font-weight: 800;
+            text-decoration: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+        }
+
+        .filter-button {
+            border: 1px solid #861b24;
+            background: #861b24;
+            color: #ffffff;
+        }
+
+        .filter-button:hover {
+            background: #6f151d;
+        }
+
+        .reset-filter-button {
+            border: 1px solid #d1d5db;
+            background: #ffffff;
+            color: #374151;
+        }
+
+        .reset-filter-button:hover {
+            background: #f9fafb;
+        }
+
+        .active-filter-info {
+            margin-top: 12px;
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .active-filter-info strong {
+            color: #111827;
+        }
+
+        /* =========================================================
            SUMMARY
         ========================================================= */
 
@@ -229,7 +338,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 950px;
+            min-width: 1100px;
         }
 
         thead {
@@ -636,6 +745,124 @@
         </div>
 
 
+        {{-- FILTER & CARIAN EVENT --}}
+        <div class="filter-card">
+
+            <div class="filter-title">
+                🔎 Carian & Kawalan Komen
+            </div>
+
+            <form
+                method="GET"
+                action="{{ route('admin.comments.index') }}"
+                class="filter-form"
+            >
+
+                <div class="filter-group">
+
+                    <label
+                        for="event_id"
+                        class="filter-label"
+                    >
+                        Pilih Event
+                    </label>
+
+                    <select
+                        id="event_id"
+                        name="event_id"
+                        class="filter-select"
+                    >
+
+                        <option value="">
+                            Semua Event
+                        </option>
+
+                        @foreach ($events as $event)
+
+                            <option
+                                value="{{ $event->id }}"
+                                {{ request('event_id') == $event->id ? 'selected' : '' }}
+                            >
+                                #{{ $event->id }} — {{ $event->name }}
+                            </option>
+
+                        @endforeach
+
+                    </select>
+
+                </div>
+
+
+                <div class="filter-search">
+
+                    <label
+                        for="search"
+                        class="filter-label"
+                    >
+                        Carian Komen
+                    </label>
+
+                    <input
+                        type="text"
+                        id="search"
+                        name="search"
+                        class="filter-input"
+                        value="{{ request('search') }}"
+                        placeholder="Cari nama, organisasi atau kandungan komen..."
+                        autocomplete="off"
+                    >
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="filter-button"
+                >
+                    🔎 Cari
+                </button>
+
+
+                @if (request('event_id') || request('search'))
+
+                    <a
+                        href="{{ route('admin.comments.index') }}"
+                        class="reset-filter-button"
+                    >
+                        ↻ Reset
+                    </a>
+
+                @endif
+
+            </form>
+
+
+            @if (request('event_id'))
+
+                @php
+                    $selectedEvent = $events->firstWhere(
+                        'id',
+                        (int) request('event_id')
+                    );
+                @endphp
+
+                <div class="active-filter-info">
+
+                    Sedang memaparkan komen untuk:
+                    <strong>
+                        #{{ request('event_id') }}
+                        @if ($selectedEvent)
+                            — {{ $selectedEvent->name }}
+                        @endif
+                    </strong>
+
+                </div>
+
+            @endif
+
+        </div>
+
+
         {{-- TABLE --}}
         <div class="table-card">
 
@@ -663,11 +890,15 @@
                         <thead>
 
                             <tr>
-                                <th style="width: 19%;">
+                                <th style="width: 17%;">
                                     Pengunjung
                                 </th>
 
-                                <th style="width: 34%;">
+                                <th style="width: 18%;">
+                                    Event
+                                </th>
+
+                                <th style="width: 30%;">
                                     Komen
                                 </th>
 
@@ -708,6 +939,30 @@
                                             <div class="organization">
                                                 {{ $comment->organization }}
                                             </div>
+
+                                        @endif
+
+                                    </td>
+
+
+                                    {{-- EVENT --}}
+                                    <td>
+
+                                        @if ($comment->event)
+
+                                            <div class="name">
+                                                #{{ $comment->event->id }}
+                                            </div>
+
+                                            <div class="organization">
+                                                {{ $comment->event->name }}
+                                            </div>
+
+                                        @else
+
+                                            <span class="organization">
+                                                Event tidak ditemui
+                                            </span>
 
                                         @endif
 

@@ -10,11 +10,12 @@ class Signature extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'signing_session_id',
-        'signature_path',
-        'signed_at',
-    ];
+  protected $fillable = [
+    'signing_session_id',
+    'signature_path',
+    'greeting_path',
+    'signed_at',
+];
 
     protected $casts = [
         'signed_at' => 'datetime',
