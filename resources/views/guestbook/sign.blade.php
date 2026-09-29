@@ -123,8 +123,8 @@
          */
         .header-image-wrap {
             position: relative;
-            width: min(1080px, 78vw);
-            height: clamp(92px, 14.2vh, 132px);
+            width: min(1296px, 93.6vw);
+            height: clamp(110px, 17.04vh, 158px);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -328,6 +328,7 @@
             width: 100%;
             text-align: center;
             overflow: hidden;
+            padding-top: 10px;
         }
 
         .signer-name {
@@ -343,7 +344,7 @@
 
         .signer-position {
             margin-top: 2px;
-            font-size: clamp(11px, 1.15vw, 16px);
+            font-size: clamp(12.1px, 1.265vw, 17.6px);
             line-height: 1.08;
             font-weight: 600;
             color: #4b5563;
@@ -587,12 +588,12 @@
             }
 
             .top-header {
-                height: 65px;
+                height: 78px;
             }
 
             .header-image-wrap {
-                width: 370px;
-                height: 64px;
+                width: 444px;
+                height: 77px;
                 border-radius: 18px;
             }
 
@@ -622,10 +623,11 @@
 
             .signer-name {
                 font-size: 18px;
+                margin-top: 10px;
             }
 
             .signer-position {
-                font-size: 10px;
+                font-size: 11px;
             }
 
             .signer-datetime {
@@ -1125,7 +1127,7 @@
                 <div class="header-image-wrap">
 
                     <img
-                        src="{{ asset('images/bg-utama-gold-blended.png') }}"
+                        src="{{ asset('images/bg-signing-tablet.png') }}"
                         alt="MELAKA DIGITAL GUESTBOOK"
                         class="header-image"
                     >

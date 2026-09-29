@@ -263,7 +263,7 @@
 
             border-collapse: collapse;
 
-            min-width: 1100px;
+            min-width: 1240px;
         }
 
         th,
@@ -509,6 +509,58 @@
 
         /*
         |--------------------------------------------------------------------------
+        | Visitor Actions
+        |--------------------------------------------------------------------------
+        */
+
+        .action-buttons {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .edit-button,
+        .delete-button {
+            min-height: 38px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+        }
+
+        .edit-button {
+            border: 1px solid #1d4ed8;
+            background: #eff6ff;
+            color: #1d4ed8;
+        }
+
+        .edit-button:hover {
+            background: #dbeafe;
+        }
+
+        .delete-form {
+            margin: 0;
+        }
+
+        .delete-button {
+            border: 1px solid #b91c1c;
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        .delete-button:hover {
+            background: #fee2e2;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
         | Mobile
         |--------------------------------------------------------------------------
         */
@@ -572,6 +624,17 @@
             }
 
             .dashboard-button {
+                width: 100%;
+            }
+
+            .action-buttons {
+                width: 100%;
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .edit-button,
+            .delete-button {
                 width: 100%;
             }
 
@@ -765,6 +828,10 @@
                                 Tarikh / Masa
                             </th>
 
+                            <th>
+                                Tindakan
+                            </th>
+
                         </tr>
 
                     </thead>
@@ -853,6 +920,37 @@
 
                                 <td>
                                     {{ $visitor->created_at?->format('d/m/Y H:i') ?? '-' }}
+                                </td>
+
+                                {{-- Tindakan --}}
+
+                                <td>
+                                    <div class="action-buttons">
+
+                                        <a
+                                            href="{{ route('admin.visitors.edit', $visitor) }}"
+                                            class="edit-button">
+                                            ✏️ Edit
+                                        </a>
+
+                                        <form
+                                            method="POST"
+                                            action="{{ route('admin.visitors.destroy', $visitor) }}"
+                                            class="delete-form"
+                                            onsubmit="return confirm('Padam rekod pengunjung ini? Tindakan ini tidak boleh dibatalkan.');">
+
+                                            @csrf
+                                            @method('DELETE')
+
+                                            <button
+                                                type="submit"
+                                                class="delete-button">
+                                                🗑️ Delete
+                                            </button>
+
+                                        </form>
+
+                                    </div>
                                 </td>
 
                             </tr>

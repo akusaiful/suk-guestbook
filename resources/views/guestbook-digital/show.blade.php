@@ -134,23 +134,25 @@
         | nisbah imej. object-fit: cover digunakan supaya ruang header penuh.
         */
         .hero-header-image {
-            width: min(1600px, calc(100vw - 24px));
-            height: 225px;
-            margin: 0 auto 6px;
+            width: 100%;
+            max-width: 1382px;
+            margin: 0 auto 10px;
             padding: 0;
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 14px;
+            background: #ffffff;
+            line-height: 0;
         }
 
         .hero-header-image img {
             width: 100%;
-            height: 100%;
+            height: auto;
             max-height: none;
-            object-fit: cover;
-            object-position: center 35%;
+            object-fit: contain;
+            object-position: center;
             display: block;
             filter: drop-shadow(0 8px 18px rgba(0,0,0,.18));
         }
@@ -936,16 +938,16 @@
 
             .hero-header-image {
                 width: calc(100vw - 20px);
-                height: 150px;
+                height: auto;
                 border-radius: 11px;
             }
 
             .hero-header-image img {
                 width: 100%;
-                height: 100%;
+                height: auto;
                 max-height: none;
-                object-fit: cover;
-                object-position: center 35%;
+                object-fit: contain;
+                object-position: center;
             }
 
             .hero-title {
@@ -1038,7 +1040,7 @@
             <div class="hero-header-image">
 
                 <img
-                    src="{{ asset('images/bg-utama-gold-classic.png') }}"
+                    src="{{ asset('images/melaka-digital-guestbook-header.png') }}"
                     alt="Melaka Digital Guestbook"
                 >
 

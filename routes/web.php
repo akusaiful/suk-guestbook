@@ -162,6 +162,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/visitors/export', [AdminVisitorExportController::class, 'export'])
             ->name('visitors.export');
 
+        Route::get('/visitors/{visitor}/edit', [AdminVisitorController::class, 'edit'])
+            ->name('visitors.edit');
+
+        Route::put('/visitors/{visitor}', [AdminVisitorController::class, 'update'])
+            ->name('visitors.update');
+
+        Route::delete('/visitors/{visitor}', [AdminVisitorController::class, 'destroy'])
+            ->name('visitors.destroy');
+
 
         /*
         |--------------------------------------------------------------------------

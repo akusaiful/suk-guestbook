@@ -37,51 +37,36 @@
 
         /* =========================================================
            HEADER MELAKA DIGITAL GUESTBOOK
-           Menggunakan artwork/banner rasmi sebagai hero header.
-           Simpan artwork di:
-           public/images/melaka-digital-guestbook-header.png
+           Banner penuh menggunakan artwork yang diberikan.
            ========================================================= */
 
         .header {
             position: relative;
             width: 100%;
-            min-height: 270px;
             overflow: hidden;
+            background: #ffffff;
             border-bottom: 4px solid #c9a34e;
-            background:
-                #0b2b59 url("{{ asset('images/melaka-digital-guestbook-header.png') }}")
-                center center / cover no-repeat;
             box-shadow: 0 8px 24px rgba(15, 35, 65, .18);
+            line-height: 0;
         }
 
-        .header::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            background: linear-gradient(
-                180deg,
-                rgba(0, 0, 0, .02) 0%,
-                rgba(0, 0, 0, 0) 55%,
-                rgba(0, 0, 0, .12) 100%
-            );
+        .header-banner {
+            display: block;
+            width: 100%;
+            max-width: 1382px;
+            height: auto;
+            margin: 0 auto;
+            object-fit: contain;
         }
 
         .header-inner {
-            position: relative;
+            position: absolute;
+            inset: 0;
             z-index: 2;
-            width: 100%;
-            max-width: 1600px;
-            min-height: 270px;
-            margin: 0 auto;
-            padding: 0;
-            display: flex;
-            align-items: flex-end;
-            justify-content: flex-end;
+            pointer-events: none;
         }
 
-        /* Artwork sudah mengandungi tajuk MELAKA DIGITAL GUESTBOOK,
-           jadi teks header lama tidak dipaparkan. */
+        /* Tajuk sudah terkandung sepenuhnya dalam artwork. */
         .header-title,
         .header-subtitle {
             display: none;
@@ -515,9 +500,13 @@
 
     <header class="header" aria-label="Melaka Digital Guestbook">
 
-        <div class="header-inner">
-            {{-- Tajuk berada terus dalam artwork header. --}}
-        </div>
+        <img
+            src="{{ asset('images/melaka-digital-guestbook-header.png') }}"
+            alt="Melaka Digital Guestbook"
+            class="header-banner"
+        >
+
+        <div class="header-inner"></div>
 
     </header>
 
