@@ -887,6 +887,32 @@
 
 
                                         {{-- ====================================================
+                                             CANCEL SIGN
+                                        ===================================================== --}}
+
+                                        <form
+                                            method="POST"
+                                            action="{{ route('admin.events.signing.cancel', [
+                                                'event' => $event->id,
+                                                'signer' => $signer->id,
+                                            ]) }}"
+                                            onsubmit="return confirm('Batalkan sesi tandatangan untuk {{ $signer->name }}? Tablet akan kembali ke skrin menunggu.')"
+                                        >
+
+                                            @csrf
+
+                                            <button
+                                                type="submit"
+                                                class="btn btn-danger"
+                                                {{ $activeSession ? '' : 'disabled' }}
+                                            >
+                                                ❌ Cancel Sign
+                                            </button>
+
+                                        </form>
+
+
+                                        {{-- ====================================================
                                              PAPAR SIGN
                                         ===================================================== --}}
 
