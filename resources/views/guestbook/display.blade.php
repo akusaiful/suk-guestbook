@@ -14075,6 +14075,21 @@ document.addEventListener(
 })();
 </script>
 
+
+<style id="fie-header-shrink-5pct-left-right">
+/* ============================================================
+ * FIE — HEADER DISPLAY DIKECILKAN 5% KIRI + 5% KANAN
+ * Hanya kotak HEADER. Kandungan Guestbook di bawah tidak disentuh.
+ * Responsive mobile kekal menggunakan layout asal.
+ * ============================================================ */
+@media (min-width: 901px) {
+    .header {
+        margin-left: 5% !important;
+        margin-right: 5% !important;
+    }
+}
+</style>
+
 </body>
 
 
