@@ -346,7 +346,7 @@ class SignatureController extends Controller
 
             'signature_path' =>
                 $signaturePath,
-
+//untuk greeting
             'greeting_path' =>
                 $greetingPath,
         ]);
