@@ -321,7 +321,7 @@
 
         .event-qr-title { margin-bottom: 2px; font-size: 12px; line-height: 1.2; font-weight: 900; letter-spacing: 1px; color: var(--gb-text); text-transform: uppercase; }
         .event-qr-subtitle { margin-top: -3px; font-size: 9px; font-weight: 800; letter-spacing: .8px; color: var(--gb-primary); text-transform: uppercase; }
-        .event-qr-canvas { display: block; width: 105px !important; height: 105px !important; margin: 3px auto 0; }
+        .event-qr-canvas { display: block; width: 122px !important; height: 122px !important; margin: 3px auto 0; background: #ffffff !important; padding: 4px !important; border-radius: 4px; image-rendering: pixelated; }
         .event-qr-caption { margin-top: 3px; font-size: 8px; line-height: 1.2; color: var(--gb-muted); }
         .event-qr-error { display: none; margin-top: 8px; font-size: 11px; line-height: 1.35; color: #b91c1c; }
 
@@ -13789,12 +13789,12 @@ document.addEventListener(
                 canvas,
                 registerUrl,
                 {
-                    width: 126,
-                    margin: 0,
+                    width: 122,
+                    margin: 4,
                     errorCorrectionLevel: 'H',
                     color: {
                         dark: '#000000',
-                        light: '#00000000'
+                        light: '#ffffff'
                     }
                 },
                 function (error) {
