@@ -496,68 +496,6 @@
             line-height: 1.6;
         }
 
-        .signature-previews {
-            margin-top: 22px;
-            display: grid;
-            grid-template-columns: minmax(0, 3fr) minmax(260px, 1fr);
-            gap: 18px;
-            align-items: stretch;
-        }
-
-        .signature-preview-card {
-            border: 1px solid #e5e7eb;
-            border-radius: 14px;
-            background: #ffffff;
-            overflow: hidden;
-        }
-
-        .signature-preview-label {
-            padding: 11px 14px;
-            border-bottom: 1px solid #e5e7eb;
-            background: #f9fafb;
-            font-size: 12px;
-            font-weight: 800;
-            letter-spacing: .3px;
-            color: #374151;
-            text-transform: uppercase;
-            text-align: center;
-        }
-
-        .signature-preview {
-            margin-top: 0;
-            min-height: 280px;
-            border: 0;
-            border-radius: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #ffffff;
-            padding: 18px;
-        }
-
-        .signature-preview img {
-            display: block;
-            max-width: 100%;
-            max-height: 360px;
-            width: auto;
-            height: auto;
-            object-fit: contain;
-        }
-
-        .signature-preview.empty {
-            min-height: 280px;
-            color: #9ca3af;
-            font-size: 13px;
-            font-weight: 600;
-            text-align: center;
-        }
-
-        @media (max-width: 900px) {
-            .signature-previews {
-                grid-template-columns: 1fr;
-            }
-        }
-
         @media (max-width: 700px) {
 
             .page {
@@ -1337,7 +1275,7 @@
                 id="signature-modal-title"
                 class="signature-modal-title"
             >
-                Papar Tandatangan & Catatan
+                Papar Tandatangan
             </div>
 
             <button
@@ -1366,41 +1304,13 @@
 
             </div>
 
-            <div class="signature-previews">
+            <div class="signature-preview">
 
-                <div class="signature-preview-card">
-
-                    <div class="signature-preview-label">
-                        Tandatangan
-                    </div>
-
-                    <div class="signature-preview">
-
-                        <img
-                            id="modal-signature-image"
-                            src=""
-                            alt="Tandatangan digital"
-                        >
-
-                    </div>
-
-                </div>
-
-
-                <div class="signature-preview-card">
-
-                    <div class="signature-preview-label">
-                        Catatan / Ucapan
-                    </div>
-
-                    <div
-                        id="modal-greeting-preview"
-                        class="signature-preview empty"
-                    >
-                        Tiada catatan direkodkan.
-                    </div>
-
-                </div>
+                <img
+                    id="modal-signature-image"
+                    src=""
+                    alt="Tandatangan digital"
+                >
 
             </div>
 
