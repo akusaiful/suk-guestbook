@@ -13086,12 +13086,13 @@ document.addEventListener(
             }
 
             const value = String(
-                parseInt(counter.textContent.trim(), 10) || 0
+                Math.max(0, parseInt(counter.textContent.replace(/[^0-9]/g, ''), 10) || 0)
             );
 
             counter.textContent = '';
             counter.classList.add('flip-counter');
             counter.dataset.flipReady = '1';
+            counter.dataset.flipValue = value;
 
             [...value].forEach((digit) => {
 
@@ -13123,13 +13124,23 @@ document.addEventListener(
 
             prepareFlipCounter(counter);
 
+            const parsedValue = parseInt(value, 10);
             const newValue = String(
-                Math.max(0, parseInt(value, 10) || 0)
+                Math.max(0, Number.isFinite(parsedValue) ? parsedValue : 0)
             );
 
-            const oldValue = [...counter.querySelectorAll('.flip-digit')]
-                .map((digit) => digit.dataset.value)
-                .join('') || '0';
+            const oldValue =
+                counter.dataset.flipValue
+                ||
+                [...counter.querySelectorAll('.flip-digit')]
+                    .map((digit) => digit.dataset.value)
+                    .join('')
+                || '0';
+
+            // Simpan nilai sasaran SEBELUM animasi bermula.
+            // Ini mengelakkan event realtime berturut-turut membaca
+            // textContent yang mengandungi digit-current + digit-next.
+            counter.dataset.flipValue = newValue;
 
             if (oldValue === newValue) {
                 return;
@@ -13668,9 +13679,11 @@ document.addEventListener(
             }
 
 
+            prepareFlipCounter(counter);
+
             const current =
                 parseInt(
-                    counter.textContent.trim(),
+                    counter.dataset.flipValue,
                     10
                 ) || 0;
 
@@ -13703,9 +13716,11 @@ document.addEventListener(
             }
 
 
+            prepareFlipCounter(counter);
+
             const current =
                 parseInt(
-                    counter.textContent.trim(),
+                    counter.dataset.flipValue,
                     10
                 ) || 0;
 
