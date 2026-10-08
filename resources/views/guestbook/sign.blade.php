@@ -1118,6 +1118,57 @@
         }
     </style>
 
+
+    <style id="tablet-header-size-repair">
+        /*
+         * HEADER SIZE REPAIR
+         * Besarkan artwork header secara mendatar supaya memenuhi
+         * kawasan atas seperti lakaran Fie, tetapi kekal center.
+         * Logic signing / Reverb / auto-save tidak disentuh.
+         */
+
+        .top-header {
+            overflow: visible !important;
+        }
+
+        .header-image-wrap {
+            overflow: visible !important;
+            width: min(1296px, 93.6vw) !important;
+            height: clamp(110px, 17.04vh, 158px) !important;
+        }
+
+        .header-image {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain !important;
+            object-position: center center !important;
+            transform: scaleX(1.72) !important;
+            transform-origin: center center !important;
+        }
+
+        @media (max-width: 1100px) {
+            .header-image {
+                transform: scaleX(1.52) !important;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .header-image {
+                transform: scaleX(1.28) !important;
+            }
+        }
+
+        @media (orientation: landscape) and (max-height: 520px) {
+            .header-image-wrap {
+                overflow: visible !important;
+            }
+
+            .header-image {
+                transform: scaleX(1.32) !important;
+            }
+        }
+    </style>
+
 </head>
 
 

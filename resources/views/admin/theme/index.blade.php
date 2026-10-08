@@ -183,6 +183,110 @@
             font-weight: 700;
         }
 
+        /* =========================================================
+           HEADER ARTWORK SELECTOR
+        ========================================================== */
+
+        .section-block {
+            margin-top: 30px;
+        }
+
+        .section-heading {
+            margin: 0 0 6px;
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        .section-description {
+            margin: 0 0 16px;
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .header-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .header-card {
+            background: #ffffff;
+            border: 2px solid #e5e7eb;
+            border-radius: 18px;
+            overflow: hidden;
+            transition: .2s ease;
+        }
+
+        .header-card.active {
+            border-color: #9f1d24;
+            box-shadow: 0 0 0 3px rgba(159, 29, 36, .08);
+        }
+
+        .header-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .header-preview {
+            aspect-ratio: 1460 / 426;
+            background: #f8fafc;
+            border-bottom: 1px solid #e5e7eb;
+            overflow: hidden;
+        }
+
+        .header-preview img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: fill;
+        }
+
+        .header-body {
+            padding: 16px;
+        }
+
+        .header-name {
+            font-size: 17px;
+            font-weight: 800;
+        }
+
+        .header-description {
+            margin-top: 6px;
+            min-height: 40px;
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.45;
+        }
+
+        .header-button {
+            width: 100%;
+            margin-top: 14px;
+            border: 0;
+            border-radius: 10px;
+            padding: 10px 12px;
+            background: #9f1d24;
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .header-button:hover {
+            background: #861b24;
+        }
+
+        @media (max-width: 1100px) {
+            .header-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 700px) {
+            .header-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
         @media (max-width: 900px) {
 
             .theme-grid {
@@ -329,6 +433,95 @@
             </div>
 
         @endforeach
+
+    </div>
+
+
+
+
+    <div class="section-block">
+
+        <h2 class="section-heading">
+            Header Paparan
+        </h2>
+
+        <p class="section-description">
+            Pilih artwork untuk Header 1-4. Saiz, kedudukan dan susunan header
+            pada Main Display dikekalkan; hanya gambar header yang berubah.
+        </p>
+
+        <div class="header-grid">
+
+            @php
+                $headerImages = config('guestbook.header_images', []);
+                $currentHeader = $event->header_image
+                    ?? config('guestbook.default_header_image', 'header-1');
+            @endphp
+
+            @foreach ($headerImages as $key => $header)
+
+                @php
+                    $isHeaderActive = $currentHeader === $key;
+                @endphp
+
+                <div class="header-card {{ $isHeaderActive ? 'active' : '' }}">
+
+                    <div class="header-preview">
+                        <img
+                            src="{{ asset($header['image']) }}"
+                            alt="{{ $header['name'] }}"
+                        >
+                    </div>
+
+                    <div class="header-body">
+
+                        @if ($isHeaderActive)
+                            <div class="badge">
+                                ✓ HEADER SEMASA
+                            </div>
+                        @endif
+
+                        <div class="header-name">
+                            {{ $header['name'] }}
+                        </div>
+
+                        <div class="header-description">
+                            {{ $header['description'] }}
+                        </div>
+
+                        <form
+                            method="POST"
+                            action="{{ route('admin.events.theme.update', [
+                                'event' => $event->id
+                            ]) }}"
+                        >
+
+                            @csrf
+
+                            @method('PUT')
+
+                            <input
+                                type="hidden"
+                                name="header_image"
+                                value="{{ $key }}"
+                            >
+
+                            <button
+                                type="submit"
+                                class="header-button"
+                            >
+                                Gunakan Header
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            @endforeach
+
+        </div>
 
     </div>
 

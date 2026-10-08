@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class EventThemeController extends Controller
@@ -24,31 +25,51 @@ class EventThemeController extends Controller
         Event $event
     ): RedirectResponse {
         $themes = config('guestbook.themes', []);
+        $headers = config('guestbook.header_images', []);
 
         $validated = $request->validate([
             'theme' => [
-                'required',
+                'nullable',
                 'string',
                 'max:50',
-                function ($attribute, $value, $fail) use ($themes) {
-                    if (!array_key_exists($value, $themes)) {
-                        $fail('Tema yang dipilih tidak sah.');
-                    }
-                },
+                Rule::in(array_keys($themes)),
+            ],
+            'header_image' => [
+                'nullable',
+                'string',
+                'max:50',
+                Rule::in(array_keys($headers)),
             ],
         ]);
 
-        $event->update([
-            'theme' => $validated['theme'],
-        ]);
+        $updates = [];
+
+        if ($request->filled('theme')) {
+            $updates['theme'] = $validated['theme'];
+        }
+
+        if ($request->filled('header_image')) {
+            $updates['header_image'] = $validated['header_image'];
+        }
+
+        if ($updates === []) {
+            return redirect()
+                ->route('admin.events.theme.edit', [
+                    'event' => $event->id,
+                ])
+                ->with('error', 'Tiada perubahan dipilih.');
+        }
+
+        $event->update($updates);
+
+        $message = isset($updates['header_image'])
+            ? 'Header paparan berjaya dikemaskini.'
+            : 'Tema event berjaya dikemaskini.';
 
         return redirect()
             ->route('admin.events.theme.edit', [
                 'event' => $event->id,
             ])
-            ->with(
-                'success',
-                'Tema event berjaya dikemaskini.'
-            );
+            ->with('success', $message);
     }
 }

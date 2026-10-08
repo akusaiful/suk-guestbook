@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\EventImagesDisplayControl;
 use App\Models\Event;
 use App\Models\EventImage;
 use Illuminate\Http\RedirectResponse;
@@ -134,6 +135,74 @@ class EventImageController extends Controller
             ->with(
                 'success',
                 'Gambar event berjaya dipadam.'
+            );
+    }
+
+    /**
+     * Mulakan paparan gambar event pada Main Display.
+     *
+     * Hanya event aktif dibenarkan dan gambar dihantar bersama
+     * broadcast supaya Main Display boleh terus memulakan cycle.
+     */
+    public function startDisplay(Event $event): RedirectResponse
+    {
+        abort_unless($event->is_active, 404);
+
+        $images = $event->images()
+            ->latest()
+            ->get()
+            ->map(function (EventImage $eventImage): array {
+                return [
+                    'id' => $eventImage->id,
+                    'url' => Storage::disk('public')->url(
+                        $eventImage->image_path
+                    ),
+                    'caption' => $eventImage->caption,
+                ];
+            })
+            ->values()
+            ->all();
+
+        if (empty($images)) {
+            return redirect()
+                ->route('admin.dashboard')
+                ->with(
+                    'error',
+                    'Tiada gambar event untuk dipaparkan.'
+                );
+        }
+
+        EventImagesDisplayControl::dispatch(
+            $event->id,
+            'start',
+            $images
+        );
+
+        return redirect()
+            ->route('admin.dashboard')
+            ->with(
+                'success',
+                'Paparan gambar event telah dimulakan.'
+            );
+    }
+
+    /**
+     * Hentikan paparan gambar event pada Main Display.
+     */
+    public function stopDisplay(Event $event): RedirectResponse
+    {
+        abort_unless($event->is_active, 404);
+
+        EventImagesDisplayControl::dispatch(
+            $event->id,
+            'stop'
+        );
+
+        return redirect()
+            ->route('admin.dashboard')
+            ->with(
+                'success',
+                'Paparan gambar event telah dihentikan.'
             );
     }
 }

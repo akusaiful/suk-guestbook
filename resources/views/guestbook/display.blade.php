@@ -13,6 +13,18 @@
         {{ $event->name }} - MELAKA DIGITAL GUESTBOOK
     </title>
 
+    @php
+        $headerImages = config('guestbook.header_images', []);
+        $selectedHeaderKey = $event->header_image
+            ?? config('guestbook.default_header_image', 'header-1');
+
+        $selectedHeader = $headerImages[$selectedHeaderKey]
+            ?? $headerImages[config('guestbook.default_header_image', 'header-1')]
+            ?? [
+                'image' => 'images/bg-terbaru.png',
+            ];
+    @endphp
+
     {{-- Laravel Vite + Echo + Reverb --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="{{ asset('css/guestbook-themes.css') }}">
@@ -11734,6 +11746,54 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     </style>
 
+
+<style id="fie-fasa3-event-image-fill-frame">
+/*
+ * FASA 3 — GAMBAR EVENT PENUHI FRAME
+ *
+ * Hanya ubah kawasan Display Gambar Event.
+ * Komen Terkini, Komen Terdahulu, QR, counter,
+ * Reverb dan fungsi lain tidak disentuh.
+ */
+
+.event-image-frame {
+    width: 100% !important;
+    height: 390px !important;
+    min-height: 390px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border-radius: 18px !important;
+}
+
+#event-display-image {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    object-fit: cover !important;
+    object-position: center center !important;
+}
+
+@media (max-width: 760px) {
+
+    .event-image-frame {
+        height: 250px !important;
+        min-height: 250px !important;
+        padding: 0 !important;
+    }
+
+    #event-display-image {
+        width: 100% !important;
+        height: 100% !important;
+        max-width: none !important;
+        max-height: none !important;
+        object-fit: cover !important;
+        object-position: center center !important;
+    }
+}
+</style>
+
 </head>
 
 
@@ -11773,7 +11833,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <div class="header-left">
 
                 <img
-                    src="{{ asset('images/bg-terbaru.png') }}"
+                    src="{{ asset($selectedHeader['image']) }}"
                     alt="MELAKA DIGITAL GUESTBOOK"
                     class="guestbook-header-logo"
                 >
@@ -11889,6 +11949,7 @@ document.addEventListener('DOMContentLoaded', function () {
             ===================================================== --}}
 
             <section
+                id="old-comments-panel"
                 class="old-comments-panel"
                 aria-labelledby="old-comments-heading">
 
@@ -12008,6 +12069,93 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     <div class="cloud-empty">
                         Belum ada komen terdahulu untuk dipaparkan.
+                    </div>
+
+                </div>
+
+                {{-- ====================================================
+                     FASA 3 — DISPLAY GAMBAR EVENT
+                     Kandungan dikawal melalui Laravel Reverb.
+                ===================================================== --}}
+                <div
+                    id="event-images-display"
+                    class="event-images-display"
+                    aria-live="polite"
+                    aria-hidden="true"
+                >
+                    <div class="event-image-frame">
+                        <img
+                            id="event-display-image"
+                            src=""
+                            alt="Gambar event"
+                        >
+                    </div>
+
+                    <div
+                        id="event-display-caption"
+                        class="event-display-caption"
+                    ></div>
+                </div>
+
+                {{-- ====================================================
+                     DISPLAY TO MAIN — SIGNATURE + UCAPAN 20 SAAT
+                ===================================================== --}}
+
+                <div
+                    id="main-signature-display"
+                    class="main-signature-display"
+                    aria-live="polite"
+                    aria-hidden="true"
+                >
+
+                    <div class="main-signature-panel">
+
+                        <div class="main-signature-image-wrap">
+
+                            <div class="main-signature-label">
+                                TANDATANGAN
+                            </div>
+
+                            <div class="main-signature-image-frame">
+
+                                <img
+                                    id="main-signature-image"
+                                    src=""
+                                    alt="Tandatangan digital"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="main-signature-message">
+
+                            <div
+                                id="main-signature-welcome"
+                                class="main-signature-welcome"
+                            >
+                                Selamat Datang
+                            </div>
+
+                            <div
+                                id="main-signature-name"
+                                class="main-signature-name"
+                            >
+                            </div>
+
+                            <div
+                                id="main-signature-position"
+                                class="main-signature-position"
+                            >
+                            </div>
+
+                            <div class="main-signature-thanks">
+                                Terima Kasih
+                            </div>
+
+                        </div>
+
                     </div>
 
                 </div>
@@ -12239,6 +12387,273 @@ document.addEventListener(
 
         /*
         |--------------------------------------------------------------------------
+        | Display Signature To Main
+        |--------------------------------------------------------------------------
+        |
+        | Event ini hanya diterima untuk Event ID yang sama kerana:
+        | 1. Main Display subscribe guestbook.event.{eventId}
+        | 2. Kita tetap semak event_id sebagai lapisan keselamatan tambahan.
+        |
+        | Komen Terkini kekal berjalan.
+        | Hanya panel Komen Terdahulu bertukar sementara.
+        |--------------------------------------------------------------------------
+        */
+
+        let mainSignatureTimer = null;
+
+        function stopCloudRotationForMainSignature() {
+
+            if (cloudRotationTimer) {
+                clearInterval(cloudRotationTimer);
+                cloudRotationTimer = null;
+            }
+
+        }
+
+
+        function restoreOlderCommentsAfterMainSignature() {
+
+            const oldCommentsPanel =
+                document.getElementById(
+                    'old-comments-panel'
+                );
+
+            const mainSignatureDisplay =
+                document.getElementById(
+                    'main-signature-display'
+                );
+
+            if (mainSignatureTimer) {
+                clearTimeout(mainSignatureTimer);
+                mainSignatureTimer = null;
+            }
+
+            if (oldCommentsPanel) {
+                oldCommentsPanel.classList.remove(
+                    'main-signature-mode'
+                );
+            }
+
+            if (mainSignatureDisplay) {
+                mainSignatureDisplay.classList.remove(
+                    'show'
+                );
+
+                mainSignatureDisplay.setAttribute(
+                    'aria-hidden',
+                    'true'
+                );
+            }
+
+            renderClouds();
+            startCloudRotation();
+
+        }
+
+
+        function displaySignatureOnMain(data) {
+
+            if (!data) {
+                return;
+            }
+
+            if (
+                Number(data.event_id) !==
+                Number(eventId)
+            ) {
+                console.warn(
+                    'Display signature diabaikan: Event ID tidak sepadan.',
+                    data
+                );
+
+                return;
+            }
+
+            const signatureUrl =
+                data.signature_url ||
+                '';
+
+            const signer =
+                data.signer ||
+                {};
+
+            const signerName =
+                signer.name ||
+                data.signer_name ||
+                '';
+
+
+            const signerPosition =
+                signer.position ||
+                data.signer_position ||
+                '';
+
+
+            const oldCommentsPanel =
+                document.getElementById(
+                    'old-comments-panel'
+                );
+
+            const mainSignatureDisplay =
+                document.getElementById(
+                    'main-signature-display'
+                );
+
+            const signatureImage =
+                document.getElementById(
+                    'main-signature-image'
+                );
+
+            const signatureName =
+                document.getElementById(
+                    'main-signature-name'
+                );
+
+            const signaturePosition =
+                document.getElementById(
+                    'main-signature-position'
+                );
+
+
+            if (
+                !oldCommentsPanel ||
+                !mainSignatureDisplay ||
+                !signatureImage
+            ) {
+                return;
+            }
+
+
+            if (mainSignatureTimer) {
+                clearTimeout(
+                    mainSignatureTimer
+                );
+
+                mainSignatureTimer =
+                    null;
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Hentikan awan kanan sementara
+            |--------------------------------------------------------------------------
+            */
+
+            stopCloudRotationForMainSignature();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Isi data signer + signature terkini
+            |--------------------------------------------------------------------------
+            */
+
+            signatureImage.src =
+                signatureUrl;
+
+            if (signatureName) {
+                signatureName.textContent =
+                    signerName;
+            }
+
+            if (signaturePosition) {
+                signaturePosition.textContent =
+                    signerPosition;
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Paparkan panel signature
+            |--------------------------------------------------------------------------
+            */
+
+            oldCommentsPanel.classList.add(
+                'main-signature-mode'
+            );
+
+            mainSignatureDisplay.setAttribute(
+                'aria-hidden',
+                'false'
+            );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Reset animasi supaya bila Admin tekan lagi,
+            | paparan akan masuk semula dengan animasi baharu.
+            |--------------------------------------------------------------------------
+            */
+
+            mainSignatureDisplay.classList.remove(
+                'show'
+            );
+
+            requestAnimationFrame(
+                function () {
+
+                    requestAnimationFrame(
+                        function () {
+
+                            mainSignatureDisplay.classList.add(
+                                'show'
+                            );
+
+                        }
+                    );
+
+                }
+            );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Tempoh standard = 20 saat
+            |--------------------------------------------------------------------------
+            */
+
+            const duration =
+                Math.max(
+                    1,
+                    Number(
+                        data.duration ?? 20
+                    )
+                );
+
+
+            mainSignatureTimer =
+                setTimeout(
+                    function () {
+
+                        restoreOlderCommentsAfterMainSignature();
+
+                    },
+                    duration * 1000
+                );
+
+        }
+
+
+        channel.listen(
+            '.signature.displayed.on.main',
+            function (data) {
+
+                console.log(
+                    'Signature dihantar ke Main Display:',
+                    data
+                );
+
+                displaySignatureOnMain(
+                    data
+                );
+
+            }
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
         | Visitor Registered
         |--------------------------------------------------------------------------
         */
@@ -12308,6 +12723,14 @@ document.addEventListener(
         let cloudOffset = 0;
         let cloudRotationTimer = null;
         let latestCommentsRotationTimer = null;
+
+        /* ========================================================
+           FASA 3 — STATE PAPARAN GAMBAR EVENT
+           ======================================================== */
+        let eventImages = [];
+        let eventImageIndex = 0;
+        let eventImagesCycleTimer = null;
+        let eventImagesActive = false;
 
 
         /*
@@ -13071,6 +13494,306 @@ document.addEventListener(
             startCloudRotation();
 
         }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | FASA 3 — Display Gambar Event
+        |--------------------------------------------------------------------------
+        */
+
+        function stopEventImagesCycle() {
+
+            if (eventImagesCycleTimer) {
+                clearInterval(eventImagesCycleTimer);
+                eventImagesCycleTimer = null;
+            }
+
+        }
+
+
+        function hideEventImageDisplay() {
+
+            const oldCommentsPanel =
+                document.getElementById(
+                    'old-comments-panel'
+                );
+
+            const eventImagesDisplay =
+                document.getElementById(
+                    'event-images-display'
+                );
+
+            if (oldCommentsPanel) {
+                oldCommentsPanel.classList.remove(
+                    'event-images-mode'
+                );
+            }
+
+            if (eventImagesDisplay) {
+                eventImagesDisplay.classList.remove(
+                    'show'
+                );
+
+                eventImagesDisplay.setAttribute(
+                    'aria-hidden',
+                    'true'
+                );
+            }
+
+        }
+
+
+        function showOlderCommentsForEventImages() {
+
+            const eventImagesDisplay =
+                document.getElementById(
+                    'event-images-display'
+                );
+
+            hideEventImageDisplay();
+
+            renderClouds();
+
+            if (eventImagesDisplay) {
+                eventImagesDisplay.setAttribute(
+                    'aria-hidden',
+                    'true'
+                );
+            }
+
+        }
+
+
+        function showEventImage(image) {
+
+            const oldCommentsPanel =
+                document.getElementById(
+                    'old-comments-panel'
+                );
+
+            const eventImagesDisplay =
+                document.getElementById(
+                    'event-images-display'
+                );
+
+            const eventDisplayImage =
+                document.getElementById(
+                    'event-display-image'
+                );
+
+            const eventDisplayCaption =
+                document.getElementById(
+                    'event-display-caption'
+                );
+
+            if (
+                !oldCommentsPanel ||
+                !eventImagesDisplay ||
+                !eventDisplayImage
+            ) {
+                return;
+            }
+
+            if (!image || !image.url) {
+                return;
+            }
+
+            oldCommentsPanel.classList.add(
+                'event-images-mode'
+            );
+
+            eventImagesDisplay.setAttribute(
+                'aria-hidden',
+                'false'
+            );
+
+            eventImagesDisplay.classList.remove(
+                'show'
+            );
+
+            eventDisplayImage.src =
+                image.url;
+
+            eventDisplayImage.alt =
+                image.caption
+                    ? image.caption
+                    : 'Gambar event';
+
+            if (eventDisplayCaption) {
+                eventDisplayCaption.textContent =
+                    image.caption || '';
+            }
+
+            requestAnimationFrame(
+                function () {
+
+                    requestAnimationFrame(
+                        function () {
+
+                            eventImagesDisplay.classList.add(
+                                'show'
+                            );
+
+                        }
+                    );
+
+                }
+            );
+
+        }
+
+
+        function startEventImagesDisplay(images) {
+
+            if (!Array.isArray(images) || images.length === 0) {
+                console.warn(
+                    'Display gambar event diabaikan: tiada gambar.'
+                );
+
+                return;
+            }
+
+            stopEventImagesCycle();
+
+            eventImages =
+                images.filter(function (image) {
+                    return image && image.url;
+                });
+
+            if (eventImages.length === 0) {
+                return;
+            }
+
+            eventImagesActive = true;
+            eventImageIndex = 0;
+
+            /*
+            | Jika signature Main masih sedang dipaparkan,
+            | hentikan paparan signature dahulu supaya dua mode
+            | tidak bertindih.
+            */
+            restoreOlderCommentsAfterMainSignature();
+
+            /*
+            | Paparan pertama = Komen Terdahulu.
+            */
+            showOlderCommentsForEventImages();
+            startCloudRotation();
+
+            /*
+            | Selepas 5 saat, tukar ke gambar pertama.
+            | Selepas itu: Komen Lama ↔ Gambar secara bergilir.
+            */
+            let showImageNext = true;
+
+            eventImagesCycleTimer =
+                setInterval(
+                    function () {
+
+                        if (!eventImagesActive) {
+                            return;
+                        }
+
+                        if (showImageNext) {
+
+                            stopCloudRotationForMainSignature();
+
+                            showEventImage(
+                                eventImages[
+                                    eventImageIndex
+                                ]
+                            );
+
+                        } else {
+
+                            showOlderCommentsForEventImages();
+                            startCloudRotation();
+
+                            eventImageIndex =
+                                (
+                                    eventImageIndex + 1
+                                ) %
+                                eventImages.length;
+
+                        }
+
+                        showImageNext = !showImageNext;
+
+                    },
+                    5000
+                );
+
+        }
+
+
+        function stopEventImagesDisplay() {
+
+            eventImagesActive = false;
+
+            stopEventImagesCycle();
+
+            eventImages = [];
+            eventImageIndex = 0;
+
+            hideEventImageDisplay();
+
+            renderClouds();
+            startCloudRotation();
+
+            console.log(
+                'Display gambar event dihentikan.'
+            );
+
+        }
+
+
+        channel.listen(
+            '.event.images.display.control',
+            function (data) {
+
+                console.log(
+                    'Arahan Display Gambar Event diterima:',
+                    data
+                );
+
+                if (!data) {
+                    return;
+                }
+
+                if (
+                    Number(data.event_id) !==
+                    Number(eventId)
+                ) {
+                    console.warn(
+                        'Arahan gambar event diabaikan: Event ID tidak sepadan.',
+                        data
+                    );
+
+                    return;
+                }
+
+                const action =
+                    String(data.action || '')
+                        .toLowerCase();
+
+                if (action === 'start') {
+
+                    startEventImagesDisplay(
+                        data.images || []
+                    );
+
+                    return;
+                }
+
+                if (action === 'stop') {
+
+                    stopEventImagesDisplay();
+
+                }
+
+            }
+        );
 
 
         /*
@@ -14104,6 +14827,304 @@ document.addEventListener(
     }
 }
 </style>
+
+
+<style id="fie-fasa1-display-to-main">
+/* ============================================================
+   FASA 1 — DISPLAY TO MAIN
+   Panel kanan sahaja berubah selama 20 saat.
+   Komen Terkini di kiri tidak disentuh.
+   ============================================================ */
+
+.old-comments-panel {
+    position: relative !important;
+}
+
+.main-signature-display {
+    display: none;
+    width: 100%;
+    min-height: 430px;
+    opacity: 0;
+    transform: translateY(18px) scale(.985);
+    transition:
+        opacity .55s ease,
+        transform .65s cubic-bezier(.22,.8,.24,1);
+}
+
+.main-signature-display.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.old-comments-panel.main-signature-mode #cloud-stage {
+    display: none !important;
+}
+
+.old-comments-panel.main-signature-mode .old-comments-caption {
+    display: none !important;
+}
+
+.old-comments-panel.main-signature-mode .main-signature-display {
+    display: block;
+}
+
+.main-signature-panel {
+    width: 100%;
+    min-height: 430px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    border-radius: 18px;
+    overflow: hidden;
+    background:
+        linear-gradient(
+            135deg,
+            rgba(5,5,5,.96) 0%,
+            rgba(20,20,20,.96) 100%
+        );
+    border: 1px solid rgba(212,175,55,.38);
+    box-shadow:
+        0 16px 35px rgba(0,0,0,.24),
+        inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+.main-signature-image-wrap {
+    min-width: 0;
+    min-height: 430px;
+    padding: 26px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    border-right: 1px solid rgba(212,175,55,.25);
+}
+
+.main-signature-label {
+    color: #FFD700;
+    font-size: 15px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-align: center;
+}
+
+.main-signature-image-frame {
+    width: 100%;
+    min-height: 285px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    border-radius: 16px;
+    background: rgba(255,255,255,.98);
+    box-shadow:
+        0 12px 30px rgba(0,0,0,.28),
+        inset 0 1px 0 rgba(255,255,255,.95);
+}
+
+.main-signature-image-frame img {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    max-height: 255px;
+    object-fit: contain;
+}
+
+.main-signature-message {
+    min-width: 0;
+    min-height: 430px;
+    padding: 30px 26px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background:
+        linear-gradient(
+            180deg,
+            rgba(11,11,11,.35),
+            rgba(0,0,0,.60)
+        );
+}
+
+.main-signature-welcome {
+    color: #FFD700;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(22px, 2.2vw, 34px);
+    font-weight: 900;
+    line-height: 1.15;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-shadow: 0 2px 7px rgba(0,0,0,.65);
+}
+
+.main-signature-name {
+    margin-top: 24px;
+    color: #ffffff;
+    font-size: clamp(22px, 2.15vw, 34px);
+    font-weight: 950;
+    line-height: 1.18;
+    text-shadow: 0 2px 7px rgba(0,0,0,.65);
+}
+
+.main-signature-position {
+    margin-top: 10px;
+    color: #F8E7A8;
+    font-size: clamp(15px, 1.45vw, 23px);
+    font-weight: 800;
+    line-height: 1.35;
+    max-width: 95%;
+    text-shadow: 0 2px 6px rgba(0,0,0,.65);
+}
+
+.main-signature-thanks {
+    margin-top: 28px;
+    color: #ffffff;
+    font-size: clamp(18px, 1.75vw, 28px);
+    font-weight: 900;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-shadow: 0 2px 7px rgba(0,0,0,.65);
+}
+
+@media (max-width: 760px) {
+
+    .main-signature-panel {
+        grid-template-columns: 1fr;
+        min-height: 430px;
+    }
+
+    .main-signature-image-wrap {
+        min-height: 210px;
+        padding: 18px;
+        border-right: 0;
+        border-bottom: 1px solid rgba(212,175,55,.25);
+    }
+
+    .main-signature-message {
+        min-height: 220px;
+        padding: 22px 18px;
+    }
+
+    .main-signature-image-frame {
+        min-height: 150px;
+    }
+
+    .main-signature-image-frame img {
+        max-height: 130px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .main-signature-display {
+        transition: none !important;
+        transform: none !important;
+    }
+}
+
+/* ============================================================
+ * FASA 3 — DISPLAY GAMBAR EVENT
+ * Hanya menggantikan panel Komen Terdahulu secara sementara.
+ * Komen Terkini di kiri tidak disentuh.
+ * ============================================================ */
+
+.event-images-display {
+    display: none;
+    width: 100%;
+    min-height: 430px;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 14px;
+    opacity: 0;
+    transform: translateY(16px) scale(.985);
+    transition:
+        opacity .55s ease,
+        transform .65s cubic-bezier(.22,.8,.24,1);
+}
+
+.event-images-display.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.old-comments-panel.event-images-mode #cloud-stage {
+    display: none !important;
+}
+
+.old-comments-panel.event-images-mode .old-comments-caption {
+    display: none !important;
+}
+
+.old-comments-panel.event-images-mode .event-images-display {
+    display: flex;
+}
+
+.event-image-frame {
+    width: 100%;
+    min-height: 360px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    border-radius: 18px;
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,.98),
+            rgba(248,242,232,.98)
+        );
+    border: 1px solid rgba(212,175,55,.40);
+    box-shadow:
+        0 14px 32px rgba(0,0,0,.18),
+        inset 0 1px 0 rgba(255,255,255,.95);
+    overflow: hidden;
+}
+
+#event-display-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 330px;
+    object-fit: contain;
+    object-position: center center;
+}
+
+.event-display-caption {
+    min-height: 22px;
+    max-width: 92%;
+    color: #F8E7A8;
+    font-size: clamp(13px, 1.05vw, 18px);
+    font-weight: 800;
+    line-height: 1.3;
+    text-align: center;
+    text-shadow: 0 2px 6px rgba(0,0,0,.60);
+}
+
+@media (max-width: 760px) {
+    .event-images-display {
+        min-height: 360px;
+    }
+
+    .event-image-frame {
+        min-height: 250px;
+    }
+
+    #event-display-image {
+        max-height: 230px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .event-images-display {
+        transition: none !important;
+        transform: none !important;
+    }
+}
+</style>
+
 
 </body>
 
@@ -16164,4 +17185,131 @@ document.addEventListener(
     transition: none !important;
 }
 
+</style>
+
+<style id="fie-final-government-blue-qr-clean">
+/* ============================================================
+ * FIE FINAL — GOVERNMENT BLUE QR CLEAN
+ *
+ * QR PENDAFTARAN / SCAN UNTUK PENDAFTARAN:
+ * - tiada background putih
+ * - tulisan putih
+ *
+ * QR CANVAS:
+ * - putih dikekalkan untuk kebolehbacaan QR
+ * ============================================================ */
+
+body.guestbook-theme.theme-government-blue
+.header-left > .event-qr-card {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+body.guestbook-theme.theme-government-blue
+.header-left > .event-qr-card .event-qr-title,
+body.guestbook-theme.theme-government-blue
+.header-left > .event-qr-card .event-qr-subtitle {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    -webkit-text-stroke: .35px rgba(0,0,0,.60) !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    text-shadow:
+        0 2px 5px rgba(0,0,0,.95),
+        0 0 8px rgba(0,0,0,.65) !important;
+}
+
+body.guestbook-theme.theme-government-blue
+.header-left > .event-qr-card .event-qr-canvas {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+}
+</style>
+<style id="fie-final-government-blue-qr-clean-v2">
+/* ============================================================
+ * FIE FINAL V2 � GOVERNMENT BLUE QR CLEAN
+ * Selector sebenar QR: .old-comments-panel > .stats > .event-qr-card
+ * ============================================================ */
+
+body.guestbook-theme.theme-government-blue
+.old-comments-panel > .stats > .event-qr-card {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+body.guestbook-theme.theme-government-blue
+.old-comments-panel > .stats > .event-qr-card .event-qr-title,
+body.guestbook-theme.theme-government-blue
+.old-comments-panel > .stats > .event-qr-card .event-qr-subtitle {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    -webkit-text-stroke: .35px rgba(0,0,0,.60) !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    text-shadow:
+        0 2px 5px rgba(0,0,0,.95),
+        0 0 8px rgba(0,0,0,.65) !important;
+}
+
+body.guestbook-theme.theme-government-blue
+.old-comments-panel > .stats > .event-qr-card .event-qr-canvas {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+}
+</style>
+<style id="fie-final-modern-melaka-qr-clean">
+/* ============================================================
+ * FIE FINAL � MODERN MELAKA QR CLEAN
+ * Label transparent, QR canvas kekal putih.
+ * ============================================================ */
+
+body.guestbook-theme.theme-modern-melaka
+.old-comments-panel > .stats > .event-qr-card {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+body.guestbook-theme.theme-modern-melaka
+.old-comments-panel > .stats > .event-qr-card .event-qr-title,
+body.guestbook-theme.theme-modern-melaka
+.old-comments-panel > .stats > .event-qr-card .event-qr-subtitle {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    -webkit-text-stroke: .35px rgba(0,0,0,.60) !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    text-shadow:
+        0 2px 5px rgba(0,0,0,.95),
+        0 0 8px rgba(0,0,0,.65) !important;
+}
+
+body.guestbook-theme.theme-modern-melaka
+.old-comments-panel > .stats > .event-qr-card .event-qr-canvas {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+}
 </style>

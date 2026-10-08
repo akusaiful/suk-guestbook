@@ -46,7 +46,8 @@ class SigningSessionOpened implements ShouldBroadcastNow
                 $this->session->opened_at?->toIso8601String(),
 
             'signer' => [
-                'id' => $this->session->signer->id,
+                'id' =>
+                    $this->session->signer->id,
 
                 'name' =>
                     $this->session->signer->name,

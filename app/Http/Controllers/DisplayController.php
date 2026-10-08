@@ -56,4 +56,19 @@ class DisplayController extends Controller
             'signatureCount' => $signatureCount,
         ]);
     }
+
+    /**
+     * Paparkan Special Display Tetamu Datuk Wira SUK untuk satu event.
+     *
+     * Special Display menggunakan view dan Realtime channel yang berasingan
+     * daripada Main Display supaya kedua-dua paparan tidak mengganggu.
+     */
+    public function special(Event $event): View
+    {
+        abort_unless($event->is_active, 404);
+
+        return view('guestbook.special-display', [
+            'event' => $event,
+        ]);
+    }
 }

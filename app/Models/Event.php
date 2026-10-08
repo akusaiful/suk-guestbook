@@ -17,6 +17,7 @@ class Event extends Model
         'location',
         'description',
         'theme',
+        'header_image',
         'is_active',
     ];
 
